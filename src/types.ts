@@ -6,6 +6,7 @@ export type MetaField = {
   name: string
   byteOffset: number
   byteLength: number
+  littleEndian?: boolean
 };
 
 export type RawField = MetaField & {
@@ -17,6 +18,7 @@ export type NumberField = Omit<MetaField, 'byteLength'> & {
   byteLength: NumberByteLength
 };
 
+// TODO encoding...
 export type StringField = MetaField & {
   type: 'string'
 };
@@ -44,17 +46,34 @@ export type UintBitField = {
   type: 'uint'
 };
 
-export interface EnumBitField {
+export type EnumBitField = {
   bits: BitPosition | BitRange
   type: 'enum'
   values: string[]
-}
+};
+
+export type ArrayField = MetaField & {
+  type: 'array'
+  item: ArrayItemField
+};
+
+export type ArrayItemField = Omit<Exclude<Field, ArrayField>, 'byteOffset' | 'name'>;
 
 export type Field =
   | RawField
   | NumberField
   | StringField
-  | BitmaskField;
+  | BitmaskField
+  | ArrayField;
+
+// export type FieldReturnType<F extends Field> =
+//   F extends NumberField ? number :
+//     F extends StringField ? string :
+//       F extends BitmaskField ? Record<string, boolean | number> :
+//         F extends RawField ? Uint8Array :
+//           F extends ArrayField
+//             ? Array<FieldReturnType<Extract<ArrayItemField & { byteOffset: number }, Field>>>
+//             : unknown;
 
 export type CodecSpec = {
   byteLength: number
