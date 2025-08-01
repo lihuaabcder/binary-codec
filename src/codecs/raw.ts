@@ -1,0 +1,17 @@
+import type { Codec, MetaField } from '../types';
+
+export type RawField = MetaField & {
+  type: 'raw'
+};
+
+export const rawCodec: Codec<RawField, Uint8Array> = {
+  type: 'raw',
+  read: (view, spec) => {
+    const { byteOffset, byteLength } = spec;
+    return new Uint8Array(view.buffer, byteOffset, byteLength);
+  },
+  write: (view, value, spec) => {
+    const { byteOffset } = spec;
+    new Uint8Array(view.buffer, view.byteOffset + byteOffset, value.length).set(value);
+  }
+};
