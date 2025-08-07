@@ -2,8 +2,7 @@ import type { Codec, MetaField } from '../types';
 import { rawCodec } from './raw';
 
 // TODO encoding...
-export type StringField = MetaField & {
-  type: 'string'
+export type StringField = MetaField<'string'> & {
   encoding?: string
   trimNull?: boolean
 };

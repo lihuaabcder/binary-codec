@@ -1,8 +1,6 @@
 import type { Codec, MetaField } from '../types';
 
-export type RawField = MetaField & {
-  type: 'raw'
-};
+export type RawField = MetaField<'raw'>;
 
 export const rawCodec: Codec<RawField, Uint8Array> = {
   type: 'raw',

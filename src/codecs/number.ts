@@ -4,8 +4,7 @@ export type NumberType = 'uint' | 'int' | 'float';
 
 export type NumberByteLength = 1 | 2 | 4;
 
-export type NumberField = Omit<MetaField, 'byteLength'> & {
-  type: 'number'
+export type NumberField = Omit<MetaField<'number'>, 'byteLength'> & {
   numberType: NumberType
   byteLength: NumberByteLength
 };
