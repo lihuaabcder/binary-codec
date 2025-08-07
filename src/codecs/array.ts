@@ -1,12 +1,18 @@
 import type { Codec, Field, MetaField } from '../types';
 import { registry } from '../registry';
 
-export type ArrayField = MetaField & {
-  type: 'array'
+export type ArrayField = MetaField<'array'> & {
   item: ArrayItemField
 };
 
-export type ArrayItemField = Omit<Exclude<Field, 'ArrayField'>, 'byteOffset'>;
+export type NonArrayField = Exclude<Field, ArrayField>;
+
+export type ArrayItemField =
+  NonArrayField extends infer U
+    ? U extends any
+      ? Omit<U, 'name'>
+      : never
+    : never;
 
 export const arrayCodec: Codec<ArrayField, unknown[]> = {
   type: 'array',

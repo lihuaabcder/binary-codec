@@ -3,8 +3,7 @@ import type { NumberByteLength } from './number';
 import { extractBits } from '../utils/bitUtils';
 import { numberCodec } from './number';
 
-export type BitmaskField = MetaField & {
-  type: 'bitmask'
+export type BitmaskField = MetaField<'bitmask'> & {
   byteLength: NumberByteLength
   map: BitmaskMap
 };
@@ -15,7 +14,7 @@ export type BitField = BooleanBitField | UintBitField | EnumBitField;
 
 export type BitPosition = number;
 
-export type BitRange = [start: number, end: number];
+export type BitRange = readonly [start: number, end: number];
 
 export type BooleanBitField = {
   bits: BitPosition
@@ -84,5 +83,5 @@ function extractBitValue(
     return extractBits(value, start, end);
   }
 
-  return (value >> bits) & 1;
+  return (value >> (bits as number)) & 1;
 }
