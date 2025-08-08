@@ -2,9 +2,9 @@ import type { Codec, MetaField } from './types';
 import { arrayCodec } from './codecs/array';
 import { bitmaskCodec } from './codecs/bitmask';
 import { numberCodec } from './codecs/number';
+import { objectCodec } from './codecs/object';
 import { rawCodec } from './codecs/raw';
 import { stringCodec } from './codecs/string';
-import { objectCodec } from './codecs/object';
 
 export class CodecRegistry {
   private map = new Map<string, Codec<any, any>>([
@@ -13,7 +13,7 @@ export class CodecRegistry {
     [numberCodec.type, numberCodec],
     [bitmaskCodec.type, bitmaskCodec],
     [arrayCodec.type, arrayCodec],
-    [objectCodec.type, objectCodec],
+    [objectCodec.type, objectCodec]
   ]);
 
   install<Spec extends MetaField<any>, T>(codec: Codec<Spec, T>): void {

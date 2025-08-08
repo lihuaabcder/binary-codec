@@ -1,9 +1,9 @@
 import type { ArrayField, ArrayItemField } from './codecs/array';
 import type { BitmaskField, BooleanBitField, EnumBitField, UintBitField } from './codecs/bitmask';
 import type { NumberField } from './codecs/number';
+import type { ObjectField } from './codecs/object';
 import type { RawField } from './codecs/raw';
 import type { StringField } from './codecs/string';
-import type { ObjectField } from './codecs/object';
 
 export type MetaField<T extends string> = {
   name: string
@@ -23,7 +23,7 @@ export type Field =
 
 export type SpecFields = {
   fields: Field[]
-}
+};
 
 export type CodecSpec = SpecFields & {
   byteLength: number
@@ -32,20 +32,20 @@ export type CodecSpec = SpecFields & {
 
 export type Codec<S extends MetaField<any>, V> = {
   type: S['type']
-  read: (view: DataView, spec: Omit<S, 'name'>) => V
+  read: (view: DataView, spec: Omit<S, 'name' | 'type'>) => V
   write?: (view: DataView, value: V, spec: S) => void
 };
 
 type BaseTypeMap = {
-  'raw': Uint8Array,
-  'number': number,
-  'string': string,
-}
+  raw: Uint8Array
+  number: number
+  string: string
+};
 
 export type DeepUnReadonly<T> = keyof T extends never
   ? T :
-    T extends ArrayBuffer ? T :
-  { -readonly [k in keyof T]: DeepUnReadonly<T[k]> };
+  T extends ArrayBuffer ? T :
+    { -readonly [k in keyof T]: DeepUnReadonly<T[k]> };
 
 export type Infer<T> = DeepUnReadonly<_Infer<T>>;
 
@@ -53,29 +53,29 @@ export type _Infer<T> =
   // Object type
   T extends { fields: Field[] } ? InferObject<T> :
   // Bitmask type
-  T extends BitmaskField ? InferBitMask<T> :
-  // Array type
-  T extends ArrayField ? InferArray<T> :
-  // Base type
-  T extends { type: infer K extends keyof BaseTypeMap } ? BaseTypeMap[K]
-  : never;
+    T extends BitmaskField ? InferBitMask<T> :
+    // Array type
+      T extends ArrayField ? InferArray<T> :
+      // Base type
+        T extends { type: infer K extends keyof BaseTypeMap } ? BaseTypeMap[K]
+          : never;
 
 export type InferObject<T extends { fields: Field[] }> = {
   [F in T['fields'][number] as F['name']]: _Infer<F>
-}
+};
 
-export type InferBitMask<T extends Omit<BitmaskField, 'name'>> = 
-  T['map'] extends infer M 
-  ? { [K in keyof M]:
+export type InferBitMask<T extends Omit<BitmaskField, 'name'>> =
+  T['map'] extends infer M
+    ? { [K in keyof M]:
       M[K] extends BooleanBitField ? boolean :
-      M[K] extends UintBitField    ? number  :
-      M[K] extends EnumBitField    ? M[K]['values'][number] :
-      never
+        M[K] extends UintBitField ? number :
+          M[K] extends EnumBitField ? M[K]['values'][number] :
+            never
     }
-  : never;
+    : never;
 
 export type InferArray<T extends ArrayField> =
   T['item'] extends infer I extends ArrayItemField
-  ? I extends { 'type': keyof BaseTypeMap } ? BaseTypeMap[I['type']][] :
-    I extends Omit<BitmaskField, 'name'> ? InferBitMask<I>[] : never
-  : never;
+    ? I extends { type: keyof BaseTypeMap } ? BaseTypeMap[I['type']][] :
+      I extends Omit<BitmaskField, 'name'> ? InferBitMask<I>[] : never
+    : never;

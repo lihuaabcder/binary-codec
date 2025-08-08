@@ -1,5 +1,5 @@
+import type { Codec, MetaField, SpecFields } from '../types';
 import { registry } from '../registry';
-import type { Codec, Field, MetaField, SpecFields } from '../types';
 
 export type ObjectField = MetaField<'object'> & SpecFields;
 
@@ -7,8 +7,12 @@ export const objectCodec: Codec<ObjectField, Record<string, any>> = {
   type: 'object',
   read: (view, spec) => {
     const result: Record<string, any> = {};
-    const { byteOffset: BaseByteOffset, fields } = spec;
-    
+    const {
+      byteOffset: BaseByteOffset,
+      fields,
+      littleEndian = false
+    } = spec;
+
     for (const field of fields) {
       const { name, type, byteOffset } = field;
       const codec = registry.get(type);
@@ -17,9 +21,10 @@ export const objectCodec: Codec<ObjectField, Record<string, any>> = {
         view,
         {
           ...field,
-          byteOffset: BaseByteOffset + byteOffset
+          byteOffset: BaseByteOffset + byteOffset,
+          littleEndian
         }
-      )
+      );
 
       result[name] = value;
     }
