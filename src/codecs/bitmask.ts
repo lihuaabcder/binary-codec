@@ -35,17 +35,23 @@ export type EnumBitField = {
 export const bitmaskCodec: Codec<BitmaskField, Record<string, any>> = {
   type: 'bitmask',
   read: (view, spec) => {
-    const { byteOffset, byteLength, littleEndian, map } = spec;
+    const {
+      byteOffset,
+      byteLength,
+      map,
+      littleEndian = false
+    } = spec;
+
     const bitmaskValue = numberCodec.read(
       view,
       {
-        type: 'number',
         numberType: 'uint',
         byteOffset,
         byteLength,
         littleEndian
       }
     );
+
     return extractBitFields(bitmaskValue, map);
   }
 };

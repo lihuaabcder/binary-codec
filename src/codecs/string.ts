@@ -28,7 +28,6 @@ export const stringCodec: Codec<StringField, string> = {
     const bytes = rawCodec.read(
       view,
       {
-        type: 'raw',
         byteOffset,
         byteLength
       }

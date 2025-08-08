@@ -1,9 +1,9 @@
-import type { BitmaskMap } from '../../src/types';
+import type { BitmaskMap } from '../../src/codecs/bitmask';
 import { describe, expect, it } from 'vitest';
-import { readBitmask } from '../../src/reader/readBitmask';
+import { bitmaskCodec } from '../../src/codecs/bitmask';
 import { toView } from '../helper';
 
-describe('readBitmask', () => {
+describe('bitmask.read', () => {
   it('should read boolean fields', () => {
     const view = toView([0b10101010]);
     const map: BitmaskMap = Array.from({
@@ -18,7 +18,15 @@ describe('readBitmask', () => {
       };
     }, {});
 
-    const result = readBitmask(view, 0, 1, map);
+    const result = bitmaskCodec.read(
+      view,
+      {
+        byteOffset: 0,
+        byteLength: 1,
+        map
+      }
+    );
+
     expect(result).toEqual({
       flag0: false,
       flag1: true,
@@ -45,7 +53,15 @@ describe('readBitmask', () => {
       };
     }, {});
 
-    const result = readBitmask(view, 0, 1, map);
+    const result = bitmaskCodec.read(
+      view,
+      {
+        byteOffset: 0,
+        byteLength: 1,
+        map
+      }
+    );
+
     expect(result).toEqual({
       flag0: 0,
       flag1: 1,
@@ -83,7 +99,15 @@ describe('readBitmask', () => {
       }
     };
 
-    const result = readBitmask(view, 0, 2, map);
+    const result = bitmaskCodec.read(
+      view,
+      {
+        byteOffset: 0,
+        byteLength: 2,
+        map
+      }
+    );
+
     expect(result).toEqual({
       num1: 3,
       num2: 1,
@@ -118,7 +142,16 @@ describe('readBitmask', () => {
       }
     };
 
-    const result = readBitmask(view, 0, 2, map, true);
+    const result = bitmaskCodec.read(
+      view,
+      {
+        byteOffset: 0,
+        byteLength: 2,
+        map,
+        littleEndian: true
+      }
+    );
+
     expect(result).toEqual({
       num1: 2,
       num2: 6,
@@ -154,7 +187,15 @@ describe('readBitmask', () => {
       }
     };
 
-    const result = readBitmask(view, 0, 1, map);
+    const result = bitmaskCodec.read(
+      view,
+      {
+        byteOffset: 0,
+        byteLength: 1,
+        map
+      }
+    );
+
     expect(result).toEqual({
       name1: 'Josh',
       name2: 'Harry',
@@ -198,7 +239,15 @@ describe('readBitmask', () => {
       }
     };
 
-    const result = readBitmask(view, 0, 2, map);
+    const result = bitmaskCodec.read(
+      view,
+      {
+        byteOffset: 0,
+        byteLength: 2,
+        map
+      }
+    );
+
     expect(result).toEqual({
       num1: 1,
       flag1: true,
