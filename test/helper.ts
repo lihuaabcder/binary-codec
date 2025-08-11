@@ -1,5 +1,20 @@
+import type { Codec, Resolver } from '../src/types';
+import { CodecRegistry } from '../src/registry/registry';
+
 export function toView(bytes: number[]) {
   const buffer = new ArrayBuffer(bytes.length);
   new Uint8Array(buffer).set(bytes);
   return new DataView(buffer);
+}
+
+export const dummyCtx: Resolver = {
+  get: (() => {
+    throw new Error('stringCodec should not call ctx.get');
+  }) as any
+};
+
+export function createTestRegistry(codecs: Codec<any, any>[]) {
+  const reg = new CodecRegistry();
+  codecs.forEach(codec => reg.install(codec));
+  return reg;
 }

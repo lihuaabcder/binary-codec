@@ -9,7 +9,7 @@ export type StringField = MetaField<'string'> & {
 
 export const stringCodec: Codec<StringField, string> = {
   type: 'string',
-  read: (view, spec) => {
+  read: (view, spec, ctx) => {
     const {
       byteLength,
       byteOffset,
@@ -30,7 +30,8 @@ export const stringCodec: Codec<StringField, string> = {
       {
         byteOffset,
         byteLength
-      }
+      },
+      ctx
     );
     const text = decoder.decode(bytes);
     return trimNull ? text.replace(/\0+$/, '') : text;
