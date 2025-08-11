@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { numberCodec } from '../../src/codecs/number';
 import { stringCodec } from '../../src/codecs/string';
-import { toView } from '../helper';
+import { createTestRegistry, toView } from '../helper';
 
-describe('string.write', () => {
+describe('string.read', () => {
+  const reg = createTestRegistry([numberCodec]);
+
   it('should decode basic ASCII string', () => {
     const view = toView([0x48, 0x65, 0x6C, 0x6C, 0x6F]);
     const str = stringCodec.read(
@@ -12,7 +15,8 @@ describe('string.write', () => {
         byteLength: 5,
         encoding: 'utf-8',
         trimNull: true
-      }
+      },
+      reg.resolver()
     );
     expect(str).toBe('Hello');
   });
@@ -26,7 +30,8 @@ describe('string.write', () => {
         byteLength: 6,
         encoding: 'utf-8',
         trimNull: true
-      }
+      },
+      reg.resolver()
     );
     expect(str).toBe('ABC');
   });
@@ -40,7 +45,8 @@ describe('string.write', () => {
         byteLength: 6,
         encoding: 'utf-8',
         trimNull: false
-      }
+      },
+      reg.resolver()
     );
     expect(str).toBe('ABC\u0000\u0000\u0000');
   });
@@ -55,7 +61,8 @@ describe('string.write', () => {
         byteOffset: 0,
         byteLength: utf8.length,
         encoding: 'utf-8'
-      }
+      },
+      reg.resolver()
     );
     expect(str).toBe('你好');
   });
@@ -69,7 +76,8 @@ describe('string.write', () => {
         byteLength: 3,
         encoding: 'utf-8',
         trimNull: true
-      }
+      },
+      reg.resolver()
     );
     expect(str).toBe('\uFFFD\uFFFDa');
   });

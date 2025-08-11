@@ -30,10 +30,14 @@ export type CodecSpec = SpecFields & {
   littleEndian?: boolean
 };
 
+export type Resolver = {
+  get: (type: string) => Codec<any, any>
+};
+
 export type Codec<S extends MetaField<any>, V> = {
   type: S['type']
-  read: (view: DataView, spec: Omit<S, 'name' | 'type'>) => V
-  write?: (view: DataView, value: V, spec: S) => void
+  read: (view: DataView, spec: Omit<S, 'name' | 'type'>, ctx: Resolver) => V
+  write?: (view: DataView, value: V, spec: S, ctx: Resolver) => void
 };
 
 type BaseTypeMap = {

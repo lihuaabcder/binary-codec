@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { numberCodec } from '../../src/codecs/number';
-import { toView } from '../helper';
+import { dummyCtx, toView } from '../helper';
 
 describe('number.read', () => {
   it('should read uint8 correctly', () => {
@@ -11,7 +11,8 @@ describe('number.read', () => {
         numberType: 'uint',
         byteOffset: 0,
         byteLength: 1
-      }
+      },
+      dummyCtx
     );
     expect(result).toBe(127);
   });
@@ -24,7 +25,8 @@ describe('number.read', () => {
         numberType: 'int',
         byteOffset: 0,
         byteLength: 1
-      }
+      },
+      dummyCtx
     );
     expect(result).toBe(-1);
   });
@@ -38,7 +40,8 @@ describe('number.read', () => {
         byteOffset: 0,
         byteLength: 2,
         littleEndian: true
-      }
+      },
+      dummyCtx
     );
     expect(result).toBe(0x1234);
   });
@@ -51,7 +54,8 @@ describe('number.read', () => {
         numberType: 'uint',
         byteOffset: 0,
         byteLength: 2
-      }
+      },
+      dummyCtx
     );
     expect(result).toBe(0x3412);
   });
@@ -65,7 +69,8 @@ describe('number.read', () => {
         byteOffset: 0,
         byteLength: 4,
         littleEndian: true
-      }
+      },
+      dummyCtx
     );
     expect(result).toBeCloseTo(10.0);
   });
@@ -78,7 +83,8 @@ describe('number.read', () => {
         numberType: 'unknown' as any,
         byteOffset: 0,
         byteLength: 1
-      }
+      },
+      dummyCtx
     );
     expect(fn).toThrow();
   });

@@ -1,9 +1,12 @@
 import type { BitmaskMap } from '../../src/codecs/bitmask';
 import { describe, expect, it } from 'vitest';
 import { bitmaskCodec } from '../../src/codecs/bitmask';
-import { toView } from '../helper';
+import { numberCodec } from '../../src/codecs/number';
+import { createTestRegistry, toView } from '../helper';
 
 describe('bitmask.read', () => {
+  const reg = createTestRegistry([numberCodec]);
+
   it('should read boolean fields', () => {
     const view = toView([0b10101010]);
     const map: BitmaskMap = Array.from({
@@ -24,7 +27,8 @@ describe('bitmask.read', () => {
         byteOffset: 0,
         byteLength: 1,
         map
-      }
+      },
+      reg.resolver()
     );
 
     expect(result).toEqual({
@@ -59,7 +63,8 @@ describe('bitmask.read', () => {
         byteOffset: 0,
         byteLength: 1,
         map
-      }
+      },
+      reg.resolver()
     );
 
     expect(result).toEqual({
@@ -105,7 +110,8 @@ describe('bitmask.read', () => {
         byteOffset: 0,
         byteLength: 2,
         map
-      }
+      },
+      reg.resolver()
     );
 
     expect(result).toEqual({
@@ -149,7 +155,8 @@ describe('bitmask.read', () => {
         byteLength: 2,
         map,
         littleEndian: true
-      }
+      },
+      reg.resolver()
     );
 
     expect(result).toEqual({
@@ -193,7 +200,8 @@ describe('bitmask.read', () => {
         byteOffset: 0,
         byteLength: 1,
         map
-      }
+      },
+      reg.resolver()
     );
 
     expect(result).toEqual({
@@ -245,7 +253,8 @@ describe('bitmask.read', () => {
         byteOffset: 0,
         byteLength: 2,
         map
-      }
+      },
+      reg.resolver()
     );
 
     expect(result).toEqual({
