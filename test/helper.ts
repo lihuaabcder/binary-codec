@@ -1,6 +1,8 @@
 import type { Codec, Resolver } from '../src/types';
 import { CodecRegistry } from '../src/registry/registry';
 
+export const u8 = (a: number[]) => new Uint8Array(a);
+
 export function toView(bytes: number[]) {
   const buffer = new ArrayBuffer(bytes.length);
   new Uint8Array(buffer).set(bytes);
@@ -9,7 +11,7 @@ export function toView(bytes: number[]) {
 
 export const dummyCtx: Resolver = {
   get: (() => {
-    throw new Error('stringCodec should not call ctx.get');
+    throw new Error('codec should not call ctx.get');
   }) as any
 };
 
