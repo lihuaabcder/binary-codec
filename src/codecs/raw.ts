@@ -8,7 +8,7 @@ export const rawCodec: Codec<RawField, Uint8Array> = {
     const { byteOffset, byteLength } = spec;
     return new Uint8Array(view.buffer, view.byteOffset + byteOffset, byteLength);
   },
-  write: (view, value, spec) => {
+  write: (view, spec, value) => {
     const { byteOffset } = spec;
     new Uint8Array(view.buffer, view.byteOffset + byteOffset, value.length).set(value);
   }

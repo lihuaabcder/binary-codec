@@ -37,7 +37,7 @@ export type Resolver = {
 export type Codec<S extends MetaField<any>, V> = {
   type: S['type']
   read: (view: DataView, spec: Omit<S, 'name' | 'type'>, ctx: Resolver) => V
-  write?: (view: DataView, value: V, spec: Omit<S, 'name' | 'type'>, ctx: Resolver) => void
+  write?: (view: DataView, spec: Omit<S, 'name' | 'type'>, value: V, ctx: Resolver) => void
 };
 
 type BaseTypeMap = {
