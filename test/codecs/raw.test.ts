@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { rawCodec } from '../../src/codecs/raw';
-import { dummyCtx, toView } from '../helper';
+import { dummyCtx, toPlainView, toView } from '../helper';
 
 describe('raw.read', () => {
   it('should extract correct bytes from buffer', () => {
@@ -59,5 +59,45 @@ describe('raw.read', () => {
       },
       dummyCtx
     )).toThrow(RangeError);
+  });
+});
+
+describe('raw.write', () => {
+  it('should write Uint8Array data at the correct offset', () => {
+    const view = toPlainView(6);
+
+    const value = new Uint8Array([0xCC, 0xDD, 0xEE]);
+
+    rawCodec.write!(
+      view,
+      value,
+      {
+        byteOffset: 2,
+        byteLength: 3
+      },
+      dummyCtx
+    );
+
+    const arr = new Uint8Array(view.buffer);
+    expect(arr.slice(0, 2)).toEqual(new Uint8Array([0, 0]));
+    expect(arr.slice(2, 5)).toEqual(value);
+    expect(arr.slice(5, 6)).toEqual(new Uint8Array([0]));
+  });
+
+  it('should throw if value out of range', () => {
+    const view = toPlainView(3);
+    const value = new Uint8Array([0xAA, 0xBB, 0xCC, 0xDD, 0xEE]);
+
+    expect(
+      () => rawCodec.write!(
+        view,
+        value,
+        {
+          byteOffset: 0,
+          byteLength: 3
+        },
+        dummyCtx
+      )
+    ).toThrow(RangeError);
   });
 });
