@@ -9,6 +9,13 @@ export function toView(bytes: number[]) {
   return new DataView(buffer);
 }
 
+export function toPlainView(length: number) {
+  const emptyArray = Array.from<number>({
+    length
+  }).fill(0);
+  return toView(emptyArray);
+}
+
 export const dummyCtx: Resolver = {
   get: (() => {
     throw new Error('codec should not call ctx.get');
