@@ -36,7 +36,7 @@ export const stringCodec: Codec<StringField, string> = {
     const text = decoder.decode(bytes);
     return trimNull ? text.replace(/\0+$/, '') : text;
   },
-  write: (view, value, spec) => {
+  write: (view, spec, value) => {
     const {
       byteLength,
       byteOffset
