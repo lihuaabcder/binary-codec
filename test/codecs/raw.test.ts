@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { rawCodec } from '../../src/codecs/raw';
-import { dummyCtx, toPlainView, toView } from '../helper';
+import { dummyCtx, toPlainView, toView, viewToArray } from '../helper';
 
 describe('raw.read', () => {
   it('should extract correct bytes from buffer', () => {
@@ -78,10 +78,10 @@ describe('raw.write', () => {
       dummyCtx
     );
 
-    const arr = new Uint8Array(view.buffer);
-    expect(arr.slice(0, 2)).toEqual(new Uint8Array([0, 0]));
-    expect(arr.slice(2, 5)).toEqual(value);
-    expect(arr.slice(5, 6)).toEqual(new Uint8Array([0]));
+    const arr = viewToArray(view);
+    expect(arr.slice(0, 2)).toEqual([0, 0]);
+    expect(arr.slice(2, 5)).toEqual(Array.from(value));
+    expect(arr.slice(5, 6)).toEqual([0]);
   });
 
   it('should throw if value out of range', () => {

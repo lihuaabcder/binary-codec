@@ -21,7 +21,7 @@ export function viewToArray(view: DataView<ArrayBuffer>) {
 }
 
 export function bufferToArray(buffer: ArrayBuffer) {
-  return new Uint8Array(buffer);
+  return Array.from(new Uint8Array(buffer));
 }
 
 export const dummyCtx: Resolver = {
