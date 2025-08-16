@@ -3,8 +3,8 @@ import type { CodecSpec, Infer } from './types';
 import { getDefaultRegistry } from './registry/default';
 
 export function deserialize<TSpec extends CodecSpec>(
-  buffer: Uint8Array,
   codecSpec: TSpec,
+  buffer: Uint8Array,
   registry: CodecRegistry = getDefaultRegistry()
 ): Infer<TSpec> {
   const view = new DataView(
@@ -24,4 +24,27 @@ export function deserialize<TSpec extends CodecSpec>(
     },
     registry.resolver()
   ) as Infer<TSpec>;
+}
+
+export function serialize(
+  codecSpec: CodecSpec,
+  value: Record<string, any>,
+  registry: CodecRegistry = getDefaultRegistry()
+): Uint8Array {
+  const { byteLength, littleEndian = false } = codecSpec;
+  const u8Arr = new Uint8Array(byteLength);
+  const view = new DataView(u8Arr.buffer);
+
+  registry.get('object').write!(
+    view,
+    {
+      ...codecSpec,
+      byteOffset: 0,
+      littleEndian
+    },
+    value,
+    registry.resolver()
+  );
+
+  return u8Arr;
 }

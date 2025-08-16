@@ -1,16 +1,16 @@
 import type { CodecSpec } from '../src/types';
 import { describe, expect, it } from 'vitest';
-import { deserialize } from '../src';
-import { createTestRegistry, u8 } from './helper';
+import { deserialize, serialize } from '../src';
 import { arrayCodec } from '../src/codecs/array';
 import { bitmaskCodec } from '../src/codecs/bitmask';
 import { numberCodec } from '../src/codecs/number';
 import { objectCodec } from '../src/codecs/object';
 import { rawCodec } from '../src/codecs/raw';
 import { stringCodec } from '../src/codecs/string';
+import { createTestRegistry, u8 } from './helper';
 
 describe('deserialize', () => {
-  it('should read with default global regsitry (number + string)', () => {
+  it('should decode with default global regsitry (number + string)', () => {
     const buf = u8([0x2A, 0x48, 0x65, 0x6C, 0x6C, 0x6F]);
 
     const spec = {
@@ -35,14 +35,14 @@ describe('deserialize', () => {
       ]
     } as const satisfies CodecSpec;
 
-    const out = deserialize(buf, spec);
+    const out = deserialize(spec, buf);
     expect(out).toEqual({
       status: 42,
       greeting: 'Hello'
     });
   });
 
-  it('should decodes with a custom minimal registry (honors base offset + LE)', () => {
+  it('should decode with a custom minimal registry (honors base offset + LE)', () => {
     const buf = u8([0, 0, 0, 0, 0x34, 0x12, 0x4F, 0x4B]);
 
     const reg = createTestRegistry([
@@ -58,13 +58,29 @@ describe('deserialize', () => {
       byteLength: 8,
       littleEndian: true,
       fields: [
-        { name: 'val', type: 'number', numberType: 'uint', byteLength: 2, byteOffset: 4 },
-        { name: 'msg', type: 'string', encoding: 'utf-8', byteLength: 2, byteOffset: 6, trimNull: true },
-      ],
+        {
+          name: 'val',
+          type: 'number',
+          numberType: 'uint',
+          byteLength: 2,
+          byteOffset: 4
+        },
+        {
+          name: 'msg',
+          type: 'string',
+          encoding: 'utf-8',
+          byteLength: 2,
+          byteOffset: 6,
+          trimNull: true
+        }
+      ]
     } as const satisfies CodecSpec;
 
-    const out = deserialize(buf, spec, reg);
-    expect(out).toEqual({ val: 0x1234, msg: 'OK' });
+    const out = deserialize(spec, buf, reg);
+    expect(out).toEqual({
+      val: 0x1234,
+      msg: 'OK'
+    });
   });
 
   it('should support overriding a codec via custom registry (string -> uppercased)', () => {
@@ -83,7 +99,7 @@ describe('deserialize', () => {
       read: (view: DataView, spec: any, ctx: any) => {
         const base = stringCodec.read(view, spec, ctx);
         return (base as string).toUpperCase();
-      },
+      }
     };
 
     reg.install(upperStringCodec);
@@ -98,11 +114,142 @@ describe('deserialize', () => {
           byteLength: 3,
           byteOffset: 0,
           trimNull: true
-        },
-      ],
+        }
+      ]
     } as const satisfies CodecSpec;
 
-    const out = deserialize(buf, spec, reg);
-    expect(out).toEqual({ shout: 'OK!' });
+    const out = deserialize(spec, buf, reg);
+    expect(out).toEqual({
+      shout: 'OK!'
+    });
+  });
+});
+
+describe('serialize', () => {
+  it('should encode with default global regsitry (number + string)', () => {
+    const value = {
+      status: 42,
+      greeting: 'Hello'
+    };
+
+    const spec = {
+      littleEndian: false,
+      byteLength: 6,
+      fields: [
+        {
+          name: 'status',
+          type: 'number',
+          numberType: 'uint',
+          byteOffset: 0,
+          byteLength: 1
+        },
+        {
+          name: 'greeting',
+          type: 'string',
+          encoding: 'utf-8',
+          byteOffset: 1,
+          byteLength: 5,
+          trimNull: true
+        }
+      ]
+    } as const satisfies CodecSpec;
+
+    const out = serialize(spec, value);
+    expect(out).toEqual(u8([0x2A, 0x48, 0x65, 0x6C, 0x6C, 0x6F]));
+  });
+
+  it('should encode with a custom minimal registry (honors base offset + LE)', () => {
+    const value = {
+      val: 0x1234,
+      msg: 'OK'
+    };
+
+    const reg = createTestRegistry([
+      rawCodec,
+      numberCodec,
+      stringCodec,
+      bitmaskCodec,
+      arrayCodec,
+      objectCodec
+    ]);
+
+    const spec = {
+      byteLength: 8,
+      littleEndian: true,
+      fields: [
+        {
+          name: 'val',
+          type: 'number',
+          numberType: 'uint',
+          byteLength: 2,
+          byteOffset: 4
+        },
+        {
+          name: 'msg',
+          type: 'string',
+          encoding: 'utf-8',
+          byteLength: 2,
+          byteOffset: 6,
+          trimNull: true
+        }
+      ]
+    } as const satisfies CodecSpec;
+
+    const out = serialize(spec, value, reg);
+    expect(out).toEqual(u8([0, 0, 0, 0, 0x34, 0x12, 0x4F, 0x4B]));
+  });
+
+  it('should support overriding a codec via custom registry (string -> uppercased)', () => {
+    const value = {
+      shout: 'OK!'
+    };
+
+    const reg = createTestRegistry([
+      rawCodec,
+      numberCodec,
+      bitmaskCodec,
+      arrayCodec,
+      objectCodec
+    ]);
+
+    const upperStringCodec = {
+      ...stringCodec,
+      write: (view: DataView, spec: any, val: any) => {
+        const {
+          byteLength,
+          byteOffset
+        } = spec;
+
+        const encoder = new TextEncoder();
+        const bytes = encoder.encode(val.toLowerCase());
+        const slice = bytes.slice(0, byteLength); // copy data and long auto-truncate
+        const target = new Uint8Array(view.buffer, view.byteOffset + byteOffset, byteLength);
+
+        target.fill(0); // set all to 0
+
+        if (slice.length > 0) {
+          target.set(slice);
+        }
+      }
+    };
+
+    reg.install(upperStringCodec);
+
+    const spec = {
+      byteLength: 3,
+      fields: [
+        {
+          name: 'shout',
+          type: 'string',
+          encoding: 'utf-8',
+          byteLength: 3,
+          byteOffset: 0,
+          trimNull: true
+        }
+      ]
+    } as const satisfies CodecSpec;
+
+    const out = serialize(spec, value, reg);
+    expect(out).toEqual(u8([0x6F, 0x6B, 0x21]));
   });
 });
