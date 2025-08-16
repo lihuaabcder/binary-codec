@@ -42,10 +42,11 @@ export const stringCodec: Codec<StringField, string> = {
       byteOffset
     } = spec;
 
+    // todo use raw write?
     const encoder = new TextEncoder();
     const bytes = encoder.encode(value);
     const slice = bytes.slice(0, byteLength); // copy data and long auto-truncate
-    const target = new Uint8Array(view.buffer, view.byteOffset + byteOffset, slice.length);
+    const target = new Uint8Array(view.buffer, view.byteOffset + byteOffset, byteLength);
 
     target.fill(0); // set all to 0
 

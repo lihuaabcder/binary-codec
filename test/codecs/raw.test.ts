@@ -70,11 +70,11 @@ describe('raw.write', () => {
 
     rawCodec.write!(
       view,
-      value,
       {
         byteOffset: 2,
         byteLength: 3
       },
+      value,
       dummyCtx
     );
 
@@ -91,11 +91,11 @@ describe('raw.write', () => {
     expect(
       () => rawCodec.write!(
         view,
-        value,
         {
           byteOffset: 0,
           byteLength: 3
         },
+        value,
         dummyCtx
       )
     ).toThrow(RangeError);
