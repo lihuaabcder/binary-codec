@@ -4,9 +4,9 @@ import { bitmaskCodec } from '../../src/codecs/bitmask';
 import { numberCodec } from '../../src/codecs/number';
 import { createTestRegistry, toPlainView, toView, viewToArray } from '../helper';
 
-describe('array.read', () => {
-  const reg = createTestRegistry([numberCodec, bitmaskCodec]);
+const reg = createTestRegistry([numberCodec, bitmaskCodec]);
 
+describe('array.read', () => {
   it('should read an array of uint8 values', () => {
     const view = toView([10, 20, 30]);
 
@@ -128,8 +128,6 @@ describe('array.read', () => {
 });
 
 describe('array.write', () => {
-  const reg = createTestRegistry([numberCodec, bitmaskCodec]);
-
   it('should write an array of uint8 values', () => {
     const view = toPlainView(3);
     const value = [10, 20, 30];

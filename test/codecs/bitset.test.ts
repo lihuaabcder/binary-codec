@@ -3,8 +3,9 @@ import { bitsetCodec } from '../../src/codecs/bitset';
 import { numberCodec } from '../../src/codecs/number';
 import { createTestRegistry, toPlainView, toView, viewToArray } from '../helper';
 
+const reg = createTestRegistry([numberCodec]);
+
 describe('bitset.read', () => {
-  const reg = createTestRegistry([numberCodec]);
   it('should read single byte, LSB-first', () => {
     // 0b10110010 = 0xB2
     // LSB-first: [bit0..bit7] = [0,1,0,0,1,1,0,1] -> [F,T,F,F,T,T,F,T]
@@ -72,8 +73,6 @@ describe('bitset.read', () => {
 });
 
 describe('bitset.write', () => {
-  const reg = createTestRegistry([numberCodec]);
-
   it('should write single byte, LSB-first', () => {
     const view = toPlainView(1);
     const value = [false, true, false, false, true, true, false, true];

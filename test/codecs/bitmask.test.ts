@@ -4,9 +4,9 @@ import { bitmaskCodec } from '../../src/codecs/bitmask';
 import { numberCodec } from '../../src/codecs/number';
 import { createTestRegistry, toPlainView, toView, viewToArray } from '../helper';
 
-describe('bitmask.read', () => {
-  const reg = createTestRegistry([numberCodec]);
+const reg = createTestRegistry([numberCodec]);
 
+describe('bitmask.read', () => {
   it('should read boolean fields', () => {
     const view = toView([0b10101010]);
     const map: BitmaskMap = Array.from({
@@ -270,8 +270,6 @@ describe('bitmask.read', () => {
 });
 
 describe('bitmask.write', () => {
-  const reg = createTestRegistry([numberCodec]);
-
   it('should write boolean fields', () => {
     const view = toPlainView(1);
 
