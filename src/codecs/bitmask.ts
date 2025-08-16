@@ -8,6 +8,8 @@ export type BitmaskField = MetaField<'bitmask'> & {
   map: BitmaskMap
 };
 
+export type BitmaskReturn = Record<string, boolean | number | string>;
+
 export type BitmaskMap = Record<string, BitField>;
 
 export type BitField = BooleanBitField | UintBitField | EnumBitField;
@@ -32,7 +34,7 @@ export type EnumBitField = {
   values: string[]
 };
 
-export const bitmaskCodec: Codec<BitmaskField, Record<string, any>> = {
+export const bitmaskCodec: Codec<BitmaskField, BitmaskReturn> = {
   type: 'bitmask',
   read: (view, spec, ctx) => {
     const {
@@ -54,6 +56,28 @@ export const bitmaskCodec: Codec<BitmaskField, Record<string, any>> = {
     );
 
     return extractBitFields(bitmaskValue, map);
+  },
+  write: (view, spec, value, ctx) => {
+    const {
+      byteOffset,
+      byteLength,
+      map,
+      littleEndian = false
+    } = spec;
+
+    const combined = combineBitFields(value, map);
+
+    numberCodec.write!(
+      view,
+      {
+        byteOffset,
+        byteLength,
+        numberType: 'uint',
+        littleEndian
+      },
+      combined,
+      ctx
+    );
   }
 };
 
@@ -91,4 +115,41 @@ function extractBitValue(
   }
 
   return (value >> (bits as number)) & 1;
+}
+
+function combineBitFields(
+  value: BitmaskReturn,
+  map: BitmaskMap
+) {
+  return Object.entries(map).reduce<number>(
+    (total, [key, bitField]) => {
+      let numericVal = 0;
+      const fieldValue = value[key];
+
+      if (fieldValue === undefined) {
+        return total;
+      }
+
+      const { bits, type } = bitField;
+      if (type === 'uint') {
+        numericVal = fieldValue as number;
+      } else if (type === 'boolean') {
+        numericVal = Number(fieldValue);
+      } else if (type === 'enum') {
+        const { values } = bitField;
+        numericVal = values.indexOf(fieldValue as string);
+      }
+
+      const bitsRange = Array.isArray(bits) ? bits : [bits];
+      const [high, low] = bitsRange.length === 1 ? [bitsRange[0], bitsRange[0]] : bitsRange;
+      const bitWidth = high - low + 1;
+
+      const maxAllowed = (1 << bitWidth) - 1;
+
+      const safeValue = numericVal & maxAllowed;
+
+      return total |= (safeValue << low);
+    },
+    0
+  );
 }
