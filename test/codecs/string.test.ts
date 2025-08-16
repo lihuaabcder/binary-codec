@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { numberCodec } from '../../src/codecs/number';
 import { stringCodec } from '../../src/codecs/string';
-import { createTestRegistry, toView } from '../helper';
+import { createTestRegistry, toPlainView, toView, viewToArray } from '../helper';
+
+const reg = createTestRegistry([numberCodec]);
 
 describe('string.read', () => {
-  const reg = createTestRegistry([numberCodec]);
-
   it('should decode basic ASCII string', () => {
     const view = toView([0x48, 0x65, 0x6C, 0x6C, 0x6F]);
     const str = stringCodec.read(
@@ -80,5 +80,58 @@ describe('string.read', () => {
       reg.resolver()
     );
     expect(str).toBe('\uFFFD\uFFFDa');
+  });
+});
+
+describe('string.write', () => {
+  it('should encode basic ASCII string', () => {
+    const view = toPlainView(5);
+    const value = 'Hello';
+
+    stringCodec.write!(
+      view,
+      {
+        byteOffset: 0,
+        byteLength: 5
+      },
+      value,
+      reg
+    );
+
+    expect(viewToArray(view)).toEqual(new Uint8Array([0x48, 0x65, 0x6C, 0x6C, 0x6F]));
+  });
+
+  it('should trucate when value is longer than byteLength', () => {
+    const view = toPlainView(4);
+    const value = 'Hello';
+
+    stringCodec.write!(
+      view,
+      {
+        byteOffset: 0,
+        byteLength: 4
+      },
+      value,
+      reg
+    );
+
+    expect(viewToArray(view)).toEqual(new Uint8Array([0x48, 0x65, 0x6C, 0x6C]));
+  });
+
+  it('should overwrite existing bytes and zero-fill the entire field', () => {
+    const view = toPlainView(6);
+    const value = 'Hello';
+
+    stringCodec.write!(
+      view,
+      {
+        byteOffset: 0,
+        byteLength: 6
+      },
+      value,
+      reg
+    );
+
+    expect(viewToArray(view)).toEqual(new Uint8Array([0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x00]));
   });
 });

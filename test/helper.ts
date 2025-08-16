@@ -16,6 +16,14 @@ export function toPlainView(length: number) {
   return toView(emptyArray);
 }
 
+export function viewToArray(view: DataView<ArrayBuffer>) {
+  return bufferToArray(view.buffer);
+}
+
+export function bufferToArray(buffer: ArrayBuffer) {
+  return new Uint8Array(buffer);
+}
+
 export const dummyCtx: Resolver = {
   get: (() => {
     throw new Error('codec should not call ctx.get');
