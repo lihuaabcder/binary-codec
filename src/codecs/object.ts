@@ -21,7 +21,7 @@ export const objectCodec: Codec<ObjectField, Record<string, any>> = {
         {
           ...field,
           byteOffset: BaseByteOffset + byteOffset,
-          littleEndian
+          littleEndian: field.littleEndian !== undefined ? field.littleEndian : littleEndian
         },
         ctx
       );
@@ -30,5 +30,33 @@ export const objectCodec: Codec<ObjectField, Record<string, any>> = {
     }
 
     return result;
+  },
+  write: (view, spec, value, ctx) => {
+    const {
+      byteOffset: BaseByteOffset,
+      fields,
+      littleEndian = false
+    } = spec;
+
+    for (const field of fields) {
+      const { name, type, byteOffset } = field;
+
+      if (value[name] === undefined) {
+        continue;
+      }
+      
+      const codec = ctx.get(type);
+
+      codec.write!(
+        view,
+        {
+          ...field,
+          byteOffset: BaseByteOffset + byteOffset,
+          littleEndian: field.littleEndian !== undefined ? field.littleEndian : littleEndian
+        },
+        value[name],
+        ctx
+      );
+    }
   }
 };
