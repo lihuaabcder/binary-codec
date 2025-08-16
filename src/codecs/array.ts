@@ -16,12 +16,10 @@ export type ArrayItemField =
 export const arrayCodec: Codec<ArrayField, unknown[]> = {
   type: 'array',
   read: (view, spec, ctx) => {
+    const result: unknown[] = [];
     const { byteOffset, byteLength, item } = spec;
 
-    const result: unknown[] = [];
-
     const { byteLength: itemByteLength } = item;
-
     const length = byteLength / itemByteLength;
 
     for (let i = 0; i < length; i++) {
@@ -40,5 +38,25 @@ export const arrayCodec: Codec<ArrayField, unknown[]> = {
     }
 
     return result;
+  },
+  write: (view, spec, value, ctx) => {
+    const { byteOffset, byteLength, item } = spec;
+    const { byteLength: itemByteLength } = item;
+
+    const length = byteLength / itemByteLength;
+
+    for (let i = 0; i < length; i++) {
+      const itemByteOffset = byteOffset + i * itemByteLength;
+      const codec = ctx.get(item.type);
+      codec.write!(
+        view,
+        {
+          ...item,
+          byteOffset: itemByteOffset
+        },
+        value[i],
+        ctx
+      );
+    }
   }
 };
