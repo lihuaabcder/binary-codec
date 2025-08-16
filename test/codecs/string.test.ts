@@ -98,7 +98,7 @@ describe('string.write', () => {
       reg
     );
 
-    expect(viewToArray(view)).toEqual(new Uint8Array([0x48, 0x65, 0x6C, 0x6C, 0x6F]));
+    expect(viewToArray(view)).toEqual([0x48, 0x65, 0x6C, 0x6C, 0x6F]);
   });
 
   it('should trucate when value is longer than byteLength', () => {
@@ -115,7 +115,7 @@ describe('string.write', () => {
       reg
     );
 
-    expect(viewToArray(view)).toEqual(new Uint8Array([0x48, 0x65, 0x6C, 0x6C]));
+    expect(viewToArray(view)).toEqual([0x48, 0x65, 0x6C, 0x6C]);
   });
 
   it('should overwrite existing bytes and zero-fill the entire field', () => {
@@ -132,6 +132,6 @@ describe('string.write', () => {
       reg
     );
 
-    expect(viewToArray(view)).toEqual(new Uint8Array([0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x00]));
+    expect(viewToArray(view)).toEqual([0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x00]);
   });
 });
