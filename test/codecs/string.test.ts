@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { numberCodec } from '../../src/codecs/number';
+import { rawCodec } from '../../src/codecs/raw';
 import { stringCodec } from '../../src/codecs/string';
 import { createTestRegistry, toPlainView, toView, viewToArray } from '../helper';
 
-const reg = createTestRegistry([numberCodec]);
+const reg = createTestRegistry([rawCodec]);
 
 describe('string.read', () => {
   it('should decode basic ASCII string', () => {

@@ -1,5 +1,5 @@
 import type { Codec, MetaField } from '../types';
-import { rawCodec } from './raw';
+import type { RawField } from './raw';
 
 // TODO encoding...
 export type StringField = MetaField<'string'> & {
@@ -25,7 +25,7 @@ export const stringCodec: Codec<StringField, string> = {
       }
     );
 
-    const bytes = rawCodec.read(
+    const bytes = ctx.get<RawField, Uint8Array>('raw').read(
       view,
       {
         byteOffset,

@@ -1,4 +1,5 @@
 import type { Codec, MetaField } from '../types';
+import type { NumberField } from './number';
 
 export type BitsetField = MetaField<'bitset'>;
 
@@ -12,7 +13,7 @@ export const bitsetCodec: Codec<BitsetField, boolean[]> = {
     for (let i = 0; i < total; i++) {
       const byteIndex = Math.floor(i / 8);
       const bitIndex = i % 8;
-      const byte = ctx.get('number').read(
+      const byte = ctx.get<NumberField, number>('number').read(
         view,
         {
           numberType: 'uint',
@@ -34,7 +35,7 @@ export const bitsetCodec: Codec<BitsetField, boolean[]> = {
 
     // set all bits to 0
     for (let i = 0; i < byteLength; i++) {
-      ctx.get('number').write!(
+      ctx.get<NumberField, number>('number').write!(
         view,
         {
           numberType: 'uint',
@@ -53,7 +54,7 @@ export const bitsetCodec: Codec<BitsetField, boolean[]> = {
 
       const byteIndex = Math.floor(i / 8);
       const bitIndex = i % 8;
-      const pre = ctx.get('number').read(
+      const pre = ctx.get<NumberField, number>('number').read(
         view,
         {
           numberType: 'uint',
@@ -63,7 +64,7 @@ export const bitsetCodec: Codec<BitsetField, boolean[]> = {
         ctx
       );
 
-      ctx.get('number').write!(
+      ctx.get<NumberField, number>('number').write!(
         view,
         {
           numberType: 'uint',

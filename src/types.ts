@@ -31,7 +31,7 @@ export type CodecSpec = SpecFields & {
 };
 
 export type Resolver = {
-  get: (type: string) => Codec<any, any>
+  get: <S extends MetaField<any> = any, V = any>(type: string) => Codec<S, V>
 };
 
 export type Codec<S extends MetaField<any>, V> = {
