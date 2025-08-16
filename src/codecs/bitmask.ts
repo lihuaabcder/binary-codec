@@ -1,7 +1,6 @@
 import type { Codec, MetaField } from '../types';
-import type { NumberByteLength } from './number';
+import type { NumberByteLength, NumberField } from './number';
 import { extractBits } from '../utils/bitUtils';
-import { numberCodec } from './number';
 
 export type BitmaskField = MetaField<'bitmask'> & {
   byteLength: NumberByteLength
@@ -44,7 +43,7 @@ export const bitmaskCodec: Codec<BitmaskField, BitmaskReturn> = {
       littleEndian = false
     } = spec;
 
-    const bitmaskValue = numberCodec.read(
+    const bitmaskValue = ctx.get<NumberField, number>('number').read(
       view,
       {
         numberType: 'uint',
@@ -67,7 +66,7 @@ export const bitmaskCodec: Codec<BitmaskField, BitmaskReturn> = {
 
     const combined = combineBitFields(value, map);
 
-    numberCodec.write!(
+    ctx.get<NumberField, number>('number').write!(
       view,
       {
         byteOffset,
