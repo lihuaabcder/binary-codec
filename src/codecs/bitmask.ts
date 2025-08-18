@@ -1,6 +1,6 @@
-import type { Codec, MetaField } from '../types';
-import type { NumberByteLength, NumberField } from './number';
-import { extractBits } from '../utils/bitUtils';
+import type { Codec, MetaField } from '../types.ts';
+import type { NumberByteLength, NumberField } from './number.ts';
+import { extractBits } from '../utils/bitUtils.ts';
 
 export type BitmaskField = MetaField<'bitmask'> & {
   byteLength: NumberByteLength

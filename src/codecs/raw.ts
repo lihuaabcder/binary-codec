@@ -1,4 +1,4 @@
-import type { Codec, MetaField } from '../types';
+import type { Codec, MetaField } from '../types.ts';
 
 export type RawField = MetaField<'raw'>;
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { bitsetCodec } from '../../src/codecs/bitset';
-import { numberCodec } from '../../src/codecs/number';
-import { createTestRegistry, toPlainView, toView, viewToArray } from '../helper';
+import { bitsetCodec } from '../../src/codecs/bitset.ts';
+import { numberCodec } from '../../src/codecs/number.ts';
+import { createTestRegistry, toPlainView, toView, viewToArray } from '../helper.ts';
 
 const reg = createTestRegistry([numberCodec]);
 

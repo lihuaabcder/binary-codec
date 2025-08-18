@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { arrayCodec } from '../../src/codecs/array';
-import { bitmaskCodec } from '../../src/codecs/bitmask';
-import { numberCodec } from '../../src/codecs/number';
-import { createTestRegistry, toPlainView, toView, viewToArray } from '../helper';
+import { arrayCodec } from '../../src/codecs/array.ts';
+import { bitmaskCodec } from '../../src/codecs/bitmask.ts';
+import { numberCodec } from '../../src/codecs/number.ts';
+import { createTestRegistry, toPlainView, toView, viewToArray } from '../helper.ts';
 
 const reg = createTestRegistry([numberCodec, bitmaskCodec]);
 

@@ -1,5 +1,5 @@
-import type { Codec, MetaField } from '../types';
-import type { NumberField } from './number';
+import type { Codec, MetaField } from '../types.ts';
+import type { NumberField } from './number.ts';
 
 export type BitsetField = MetaField<'bitset'>;
 

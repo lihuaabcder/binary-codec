@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { numberCodec } from '../../src/codecs/number';
-import { dummyCtx, toPlainView, toView, viewToArray } from '../helper';
+import { numberCodec } from '../../src/codecs/number.ts';
+import { dummyCtx, toPlainView, toView, viewToArray } from '../helper.ts';
 
 describe('number.read', () => {
   it('should read uint8 correctly', () => {
@@ -155,7 +155,7 @@ describe('number.write', () => {
       {
         numberType: 'uint',
         byteOffset: 0,
-        byteLength: 2,
+        byteLength: 2
       },
       value,
       dummyCtx
@@ -238,5 +238,5 @@ describe('number.write', () => {
     // );
 
     // expect(fn).toThrow();
-  })
+  });
 });

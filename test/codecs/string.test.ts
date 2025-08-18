@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { rawCodec } from '../../src/codecs/raw';
-import { stringCodec } from '../../src/codecs/string';
-import { createTestRegistry, toPlainView, toView, viewToArray } from '../helper';
+import { rawCodec } from '../../src/codecs/raw.ts';
+import { stringCodec } from '../../src/codecs/string.ts';
+import { createTestRegistry, toPlainView, toView, viewToArray } from '../helper.ts';
 
 const reg = createTestRegistry([rawCodec]);
 
