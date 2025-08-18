@@ -1,4 +1,4 @@
-import type { Codec, Field, MetaField } from '../types';
+import type { Codec, Field, MetaField } from '../types.ts';
 
 export type ArrayField = MetaField<'array'> & {
   item: ArrayItemField

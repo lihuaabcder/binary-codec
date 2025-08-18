@@ -1,4 +1,4 @@
-import type { Codec, MetaField, SpecFields } from '../types';
+import type { Codec, MetaField, SpecFields } from '../types.ts';
 
 export type ObjectField = MetaField<'object'> & SpecFields;
 
@@ -44,7 +44,7 @@ export const objectCodec: Codec<ObjectField, Record<string, any>> = {
       if (value[name] === undefined) {
         continue;
       }
-      
+
       const codec = ctx.get(type);
 
       codec.write!(

@@ -1,6 +1,6 @@
-import type { CodecRegistry } from './registry/registry';
-import type { CodecSpec, Infer } from './types';
-import { getDefaultRegistry } from './registry/default';
+import type { CodecRegistry } from './registry/registry.ts';
+import type { CodecSpec, Infer } from './types.ts';
+import { getDefaultRegistry } from './registry/default.ts';
 
 export function deserialize<TSpec extends CodecSpec>(
   codecSpec: TSpec,

@@ -1,13 +1,13 @@
-import type { CodecSpec } from '../src/types';
+import type { CodecSpec } from '../src/types.ts';
 import { describe, expect, it } from 'vitest';
-import { deserialize, serialize } from '../src';
-import { arrayCodec } from '../src/codecs/array';
-import { bitmaskCodec } from '../src/codecs/bitmask';
-import { numberCodec } from '../src/codecs/number';
-import { objectCodec } from '../src/codecs/object';
-import { rawCodec } from '../src/codecs/raw';
-import { stringCodec } from '../src/codecs/string';
-import { createTestRegistry, u8 } from './helper';
+import { arrayCodec } from '../src/codecs/array.ts';
+import { bitmaskCodec } from '../src/codecs/bitmask.ts';
+import { numberCodec } from '../src/codecs/number.ts';
+import { objectCodec } from '../src/codecs/object.ts';
+import { rawCodec } from '../src/codecs/raw.ts';
+import { stringCodec } from '../src/codecs/string.ts';
+import { deserialize, serialize } from '../src/index.ts';
+import { createTestRegistry, u8 } from './helper.ts';
 
 describe('deserialize', () => {
   it('should decode with default global regsitry (number + string)', () => {

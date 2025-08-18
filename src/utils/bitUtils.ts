@@ -1,4 +1,4 @@
-export function extractBits(value: number, start: number, end: number) {
+export function extractBits(value: number, start: number, end: number): number {
   const high = Math.max(start, end);
   const low = Math.min(start, end);
   const bitLength = high - low + 1;

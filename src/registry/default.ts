@@ -1,9 +1,9 @@
-import { installAll } from './install';
-import { CodecRegistry } from './registry';
+import { installAll } from './install.ts';
+import { CodecRegistry } from './registry.ts';
 
 let _default: CodecRegistry | null = null;
 
-export function getDefaultRegistry() {
+export function getDefaultRegistry(): CodecRegistry {
   if (!_default) {
     _default = new CodecRegistry();
     installAll(_default);

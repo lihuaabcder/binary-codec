@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { rawCodec } from '../../src/codecs/raw';
-import { dummyCtx, toPlainView, toView, viewToArray } from '../helper';
+import { rawCodec } from '../../src/codecs/raw.ts';
+import { dummyCtx, toPlainView, toView, viewToArray } from '../helper.ts';
 
 describe('raw.read', () => {
   it('should extract correct bytes from buffer', () => {
