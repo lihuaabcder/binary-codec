@@ -53,7 +53,7 @@ export type DeepUnReadonly<T> = keyof T extends never
 
 export type Infer<T> = DeepUnReadonly<_Infer<T>>;
 
-export type _Infer<T>
+type _Infer<T>
   // Object type
   = T extends { fields: Field[] } ? InferObject<T>
   // Bitmask type

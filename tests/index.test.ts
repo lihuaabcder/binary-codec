@@ -6,7 +6,7 @@ import { numberCodec } from '../src/codecs/number.ts';
 import { objectCodec } from '../src/codecs/object.ts';
 import { rawCodec } from '../src/codecs/raw.ts';
 import { stringCodec } from '../src/codecs/string.ts';
-import { deserialize, serialize } from '../src/index.ts';
+import { deserialize, serialize } from '../src/entries/index.ts';
 import { createTestRegistry, u8 } from './helper.ts';
 
 describe('deserialize', () => {
