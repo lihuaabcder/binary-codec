@@ -68,7 +68,7 @@ export type InferObject<T extends { fields: Field[] }> = {
   [F in T['fields'][number] as F['name']]: _Infer<F>
 };
 
-export type InferBitMask<T extends Omit<BitmaskField, 'name'>>
+export type InferBitMask<T extends Omit<BitmaskField, 'name' | 'byteOffset'>>
   = T['map'] extends infer M
     ? { [K in keyof M]:
       M[K] extends BooleanBitField ? boolean
@@ -81,5 +81,5 @@ export type InferBitMask<T extends Omit<BitmaskField, 'name'>>
 export type InferArray<T extends ArrayField>
   = T['item'] extends infer I extends ArrayItemField
     ? I extends { type: keyof BaseTypeMap } ? BaseTypeMap[I['type']][]
-      : I extends Omit<BitmaskField, 'name'> ? InferBitMask<I>[] : never
+      : I extends Omit<BitmaskField, 'name' | 'byteOffset'> ? InferBitMask<I>[] : never
     : never;
