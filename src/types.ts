@@ -1,5 +1,6 @@
 import type { ArrayField, ArrayItemField } from './codecs/array.ts';
 import type { BitmaskField, BooleanBitField, EnumBitField, UintBitField } from './codecs/bitmask.ts';
+import type { BitsetField } from './codecs/bitset.ts';
 import type { NumberField } from './codecs/number.ts';
 import type { ObjectField } from './codecs/object.ts';
 import type { RawField } from './codecs/raw.ts';
@@ -18,6 +19,7 @@ export type Field
     | NumberField
     | StringField
     | BitmaskField
+    | BitsetField
     | ArrayField
     | ObjectField;
 
@@ -44,6 +46,7 @@ type BaseTypeMap = {
   raw: Uint8Array
   number: number
   string: string
+  bitset: boolean[]
 };
 
 export type DeepUnReadonly<T> = keyof T extends never
