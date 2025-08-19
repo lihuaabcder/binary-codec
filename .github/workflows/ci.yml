@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+       
+        node-version: [ "20.18.0", "22" ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Enable Corepack and pin pnpm 10.14.0
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.14.0 --activate
+          pnpm -v
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+
+      - name: Test (Vitest)
+        run: pnpm test -- --run
+
+      - name: Build (tsdown)
+        run: pnpm run build
+
+      - name: Upload dist artifact (only on Node 20.18.0)
+        if: matrix.node-version == '20.18.0' && success() && hashFiles('dist/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
