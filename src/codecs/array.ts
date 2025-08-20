@@ -6,12 +6,11 @@ export type ArrayField = MetaField<'array'> & {
 
 export type NonArrayField = Exclude<Field, ArrayField>;
 
-export type ArrayItemField =
-  NonArrayField extends infer U
-    ? U extends any
-      ? Omit<U, 'name' | 'byteOffset'>
-      : never
-    : never;
+export type ArrayItemField = NonArrayField extends infer U
+  ? U extends any
+    ? Omit<U, 'name' | 'byteOffset'>
+    : never
+  : never;
 
 export const arrayCodec: Codec<ArrayField, unknown[]> = {
   type: 'array',
