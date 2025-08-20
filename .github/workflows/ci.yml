@@ -2,61 +2,46 @@ name: CI
 
 on:
   push:
-    branches: [ "main", "dev" ]
   pull_request:
-    branches: [ "main", "dev" ]
+    branches: [main, dev]
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-and-test:
+  test-build:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        node-version: ["20.18.0", "22.x"]
+        node-version: ['20', '22']
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: pnpm
 
-      - name: Install pnpm 10.14.0
-        run: |
-          npm i -g pnpm@10.14.0
-          pnpm -v
-          which pnpm
-
-      
-      - name: Restore pnpm store cache
-        id: pnpm-cache
-        uses: actions/cache@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
+          version: 10
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
-      - name: Test (Vitest)
-        run: pnpm vitest run
+      - name: Type check
+        run: pnpm exec tsc -p tsconfig.json --noEmit
 
-      - name: Build (tsdown)
-        run: pnpm run build
+      - name: Lint
+        run: pnpm lint
 
-      - name: Upload dist (only Node 20.18.0)
-        if: matrix.node-version == '20.18.0' && success() && hashFiles('dist/**') != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist
+      - name: Build
+        run: pnpm build
 
-
+      - name: Test
+        run: pnpm vitest
