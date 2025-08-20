@@ -30,7 +30,8 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "typecheck": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest",
+    "release:beta": "pnpm version prerelease --preid=beta && git push --follow-tags"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.13.1",
