@@ -31,8 +31,7 @@
     "lint:fix": "eslint --fix",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
-    "release": "bumpp",
-    "release:beta": "bumpp --preid beta"
+    "release": "bumpp"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.13.1",
