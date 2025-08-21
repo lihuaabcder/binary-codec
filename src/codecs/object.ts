@@ -1,4 +1,5 @@
 import type { Codec, MetaField, SpecFields } from '../types.ts';
+import { ValidationLevel } from '../validation/types.ts';
 
 export type ObjectField = MetaField<'object'> & SpecFields;
 
@@ -58,5 +59,65 @@ export const objectCodec: Codec<ObjectField, Record<string, any>> = {
         ctx
       );
     }
+  },
+  validate: (spec, path, ctx) => {
+    const results = [];
+    const { fields, byteLength } = spec;
+
+    if (!fields || !Array.isArray(fields)) {
+      results.push({
+        level: ValidationLevel.FATAL,
+        message: 'Object field must have a fields array',
+        path: `${path}.fields`,
+        code: 'MISSING_OBJECT_FIELDS'
+      });
+      return results;
+    }
+
+    if (fields.length === 0) {
+      results.push({
+        level: ValidationLevel.WARNING,
+        message: 'Object field has empty fields array',
+        path: `${path}.fields`,
+        code: 'EMPTY_OBJECT_FIELDS'
+      });
+    }
+
+    // Check if any field extends beyond object bounds
+    fields.forEach((field, index) => {
+      const fieldEnd = field.byteOffset + field.byteLength;
+      if (fieldEnd > byteLength) {
+        results.push({
+          level: ValidationLevel.FATAL,
+          message: `Object field '${field.name}' extends beyond object boundary (${fieldEnd} > ${byteLength})`,
+          path: `${path}.fields[${index}]`,
+          code: 'OBJECT_FIELD_OUT_OF_BOUNDS'
+        });
+      }
+
+      // Recursively validate each field using its codec
+      try {
+        const codec = ctx.get(field.type);
+        if (codec.validate) {
+          const fieldValidationResults = codec.validate(field, '', ctx);
+          // Adjust paths to be relative to this object field
+          const adjustedResults = fieldValidationResults.map(result => ({
+            ...result,
+            path: result.path ? `${path}.fields[${index}]${result.path}` : `${path}.fields[${index}]`
+          }));
+          results.push(...adjustedResults);
+        }
+      // eslint-disable-next-line unused-imports/no-unused-vars
+      } catch (error) {
+        results.push({
+          level: ValidationLevel.FATAL,
+          message: `Unknown field type: ${field.type}`,
+          path: `${path}.fields[${index}].type`,
+          code: 'UNKNOWN_FIELD_TYPE'
+        });
+      }
+    });
+
+    return results;
   }
 };

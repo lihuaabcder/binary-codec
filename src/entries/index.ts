@@ -1,12 +1,34 @@
 import type { CodecRegistry } from '../registry/registry.ts';
 import type { CodecSpec, Infer } from '../types.ts';
+import type { ValidationOptions } from '../validation/types.ts';
 import { getDefaultRegistry } from '../registry/default.ts';
+import { processValidationResults, validateCodecSpec, validateRuntime } from '../validation/validator.ts';
 
 export function deserialize<TSpec extends CodecSpec>(
   codecSpec: TSpec,
   buffer: Uint8Array,
-  registry: CodecRegistry = getDefaultRegistry()
+  registry: CodecRegistry = getDefaultRegistry(),
+  options: ValidationOptions = {}
 ): Infer<TSpec> {
+  const {
+    validate = true,
+    onValidation,
+    throwOnFatal = true
+  } = options;
+
+  // Perform validation if enabled
+  if (validate) {
+    // Static validation
+    const staticResults = validateCodecSpec(codecSpec, registry);
+
+    // Runtime validation
+    const runtimeResults = validateRuntime(codecSpec, buffer);
+
+    // Process all validation results
+    const allResults = [...staticResults, ...runtimeResults];
+    processValidationResults(allResults, throwOnFatal, onValidation);
+  }
+
   const view = new DataView(
     buffer.buffer,
     buffer.byteOffset,

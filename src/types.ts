@@ -5,6 +5,7 @@ import type { NumberField } from './codecs/number.ts';
 import type { ObjectField } from './codecs/object.ts';
 import type { RawField } from './codecs/raw.ts';
 import type { StringField } from './codecs/string.ts';
+import type { ValidationResult } from './validation/types.ts';
 
 export type MetaField<T extends string> = {
   name: string
@@ -40,6 +41,7 @@ export type Codec<S extends MetaField<any>, V> = {
   type: S['type']
   read: (view: DataView, spec: Omit<S, 'name' | 'type'>, ctx: Resolver) => V
   write?: (view: DataView, spec: Omit<S, 'name' | 'type'>, value: V, ctx: Resolver) => void
+  validate?: (spec: S, path: string, ctx: Resolver) => ValidationResult[]
 };
 
 type BaseTypeMap = {

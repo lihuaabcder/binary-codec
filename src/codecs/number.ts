@@ -1,4 +1,5 @@
 import type { Codec, MetaField } from '../types.ts';
+import { ValidationLevel } from '../validation/types.ts';
 
 export type NumberType = 'uint' | 'int' | 'float';
 
@@ -87,5 +88,27 @@ export const numberCodec: Codec<NumberField, number> = {
     const fn = view[method] as (off: number, val: number, le?: boolean) => void;
 
     isSingleByte ? fn.call(view, byteOffset, value) : fn.call(view, byteOffset, value, littleEndian);
+  },
+  validate: (spec, path, _ctx) => {
+    const results = [];
+    const { numberType, byteLength } = spec;
+
+    // Validate number type and byte length combinations
+    const validCombinations: Record<NumberType, NumberByteLength[]> = {
+      uint: [1, 2, 4],
+      int: [1, 2, 4],
+      float: [4]
+    };
+
+    if (!validCombinations[numberType]?.includes(byteLength)) {
+      results.push({
+        level: ValidationLevel.FATAL,
+        message: `Invalid combination: ${numberType} with ${byteLength} bytes`,
+        path,
+        code: 'INVALID_NUMBER_TYPE_LENGTH'
+      });
+    }
+
+    return results;
   }
 };

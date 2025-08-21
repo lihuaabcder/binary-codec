@@ -1,5 +1,6 @@
 import type { Codec, MetaField } from '../types.ts';
 import type { NumberField } from './number.ts';
+import { ValidationLevel } from '../validation/types.ts';
 
 export type BitsetField = MetaField<'bitset'>;
 
@@ -75,5 +76,20 @@ export const bitsetCodec: Codec<BitsetField, boolean[]> = {
         ctx
       );
     }
+  },
+  validate: (spec, path, _ctx) => {
+    const results = [];
+    const { byteLength } = spec;
+
+    if (byteLength <= 0) {
+      results.push({
+        level: ValidationLevel.FATAL,
+        message: 'Bitset field byteLength must be positive',
+        path: `${path}.byteLength`,
+        code: 'INVALID_BITSET_LENGTH'
+      });
+    }
+
+    return results;
   }
 };
