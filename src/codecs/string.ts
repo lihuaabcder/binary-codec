@@ -61,7 +61,9 @@ export const stringCodec: Codec<StringField, string> = {
 
     if (encoding) {
       try {
+        // eslint-disable-next-line no-new
         new TextDecoder(encoding);
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (error) {
         results.push({
           level: ValidationLevel.ERROR,
