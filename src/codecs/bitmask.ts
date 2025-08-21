@@ -82,13 +82,13 @@ export const bitmaskCodec: Codec<BitmaskField, BitmaskReturn> = {
   validate: (spec, path, _ctx) => {
     const results = [];
     const maxBits = spec.byteLength * 8;
-    
+
     for (const [mapKey, bitField] of Object.entries(spec.map)) {
       const bitFieldPath = `${path}.map.${mapKey}`;
-      
+
       if (Array.isArray(bitField.bits)) {
         const [high, low] = bitField.bits;
-        
+
         if (high >= maxBits || low >= maxBits) {
           results.push({
             level: ValidationLevel.FATAL,
@@ -97,7 +97,7 @@ export const bitmaskCodec: Codec<BitmaskField, BitmaskReturn> = {
             code: 'BIT_OUT_OF_RANGE'
           });
         }
-        
+
         if (high < low) {
           results.push({
             level: ValidationLevel.ERROR,
@@ -106,7 +106,7 @@ export const bitmaskCodec: Codec<BitmaskField, BitmaskReturn> = {
             code: 'INVALID_BIT_RANGE'
           });
         }
-        
+
         if (bitField.type === 'enum') {
           const bitWidth = high - low + 1;
           const maxValues = 1 << bitWidth;
@@ -131,7 +131,7 @@ export const bitmaskCodec: Codec<BitmaskField, BitmaskReturn> = {
         }
       }
     }
-    
+
     return results;
   }
 };
