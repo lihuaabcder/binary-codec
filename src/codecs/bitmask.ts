@@ -1,6 +1,7 @@
 import type { Codec, MetaField } from '../types.ts';
 import type { NumberByteLength, NumberField } from './number.ts';
 import { extractBits } from '../utils/bitUtils.ts';
+import { ValidationLevel } from '../validation/types.ts';
 
 export type BitmaskField = MetaField<'bitmask'> & {
   byteLength: NumberByteLength
@@ -77,6 +78,61 @@ export const bitmaskCodec: Codec<BitmaskField, BitmaskReturn> = {
       combined,
       ctx
     );
+  },
+  validate: (spec, path, _ctx) => {
+    const results = [];
+    const maxBits = spec.byteLength * 8;
+    
+    for (const [mapKey, bitField] of Object.entries(spec.map)) {
+      const bitFieldPath = `${path}.map.${mapKey}`;
+      
+      if (Array.isArray(bitField.bits)) {
+        const [high, low] = bitField.bits;
+        
+        if (high >= maxBits || low >= maxBits) {
+          results.push({
+            level: ValidationLevel.FATAL,
+            message: `Bit position ${Math.max(high, low)} exceeds field size (${maxBits} bits)`,
+            path: bitFieldPath,
+            code: 'BIT_OUT_OF_RANGE'
+          });
+        }
+        
+        if (high < low) {
+          results.push({
+            level: ValidationLevel.ERROR,
+            message: `Bit range [${high}, ${low}] has high < low`,
+            path: bitFieldPath,
+            code: 'INVALID_BIT_RANGE'
+          });
+        }
+        
+        if (bitField.type === 'enum') {
+          const bitWidth = high - low + 1;
+          const maxValues = 1 << bitWidth;
+          if (bitField.values.length > maxValues) {
+            results.push({
+              level: ValidationLevel.ERROR,
+              message: `Too many enum values (${bitField.values.length}) for ${bitWidth} bits (max ${maxValues})`,
+              path: bitFieldPath,
+              code: 'TOO_MANY_ENUM_VALUES'
+            });
+          }
+        }
+      } else {
+        // Single bit position
+        if (typeof bitField.bits === 'number' && bitField.bits >= maxBits) {
+          results.push({
+            level: ValidationLevel.FATAL,
+            message: `Bit position ${bitField.bits} exceeds field size (${maxBits} bits)`,
+            path: bitFieldPath,
+            code: 'BIT_OUT_OF_RANGE'
+          });
+        }
+      }
+    }
+    
+    return results;
   }
 };
 

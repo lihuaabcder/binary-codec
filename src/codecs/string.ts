@@ -1,5 +1,6 @@
 import type { Codec, MetaField } from '../types.ts';
 import type { RawField } from './raw.ts';
+import { ValidationLevel } from '../validation/types.ts';
 
 // TODO encoding...
 export type StringField = MetaField<'string'> & {
@@ -53,5 +54,24 @@ export const stringCodec: Codec<StringField, string> = {
     if (slice.length > 0) {
       target.set(slice);
     }
+  },
+  validate: (spec, path, _ctx) => {
+    const results = [];
+    const { encoding } = spec;
+
+    if (encoding) {
+      try {
+        new TextDecoder(encoding);
+      } catch (error) {
+        results.push({
+          level: ValidationLevel.ERROR,
+          message: `Invalid encoding: ${encoding}`,
+          path,
+          code: 'INVALID_ENCODING'
+        });
+      }
+    }
+
+    return results;
   }
 };

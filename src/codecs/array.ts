@@ -1,4 +1,5 @@
 import type { Codec, Field, MetaField } from '../types.ts';
+import { ValidationLevel } from '../validation/types.ts';
 
 export type ArrayField = MetaField<'array'> & {
   item: ArrayItemField
@@ -57,5 +58,68 @@ export const arrayCodec: Codec<ArrayField, unknown[]> = {
         ctx
       );
     }
+  },
+  validate: (spec, path, ctx) => {
+    const results = [];
+    const { byteLength, item } = spec;
+
+    if (!item) {
+      results.push({
+        level: ValidationLevel.FATAL,
+        message: 'Array field must have an item specification',
+        path: `${path}.item`,
+        code: 'MISSING_ARRAY_ITEM'
+      });
+      return results;
+    }
+
+    if (!item.byteLength || item.byteLength <= 0) {
+      results.push({
+        level: ValidationLevel.FATAL,
+        message: 'Array item must have a positive byteLength',
+        path: `${path}.item.byteLength`,
+        code: 'INVALID_ARRAY_ITEM_LENGTH'
+      });
+      return results;
+    }
+
+    // Check if array length is evenly divisible by item length
+    if (byteLength % item.byteLength !== 0) {
+      results.push({
+        level: ValidationLevel.WARNING,
+        message: `Array byteLength (${byteLength}) is not evenly divisible by item byteLength (${item.byteLength})`,
+        path,
+        code: 'ARRAY_LENGTH_NOT_DIVISIBLE'
+      });
+    }
+
+    // Validate the item type using its codec
+    try {
+      const codec = ctx.get(item.type);
+      if (codec.validate) {
+        // Create a mock field spec for the item to validate
+        const itemFieldSpec = {
+          name: 'arrayItem',
+          ...item
+        };
+        const itemValidationResults = codec.validate(itemFieldSpec as any, '', ctx);
+        // Adjust paths to be relative to this array field
+        const adjustedResults = itemValidationResults.map(result => ({
+          ...result,
+          path: result.path ? `${path}.item${result.path}` : `${path}.item`
+        }));
+        results.push(...adjustedResults);
+      }
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    } catch (error) {
+      results.push({
+        level: ValidationLevel.FATAL,
+        message: `Unknown array item type: ${item.type}`,
+        path: `${path}.item.type`,
+        code: 'UNKNOWN_ARRAY_ITEM_TYPE'
+      });
+    }
+
+    return results;
   }
 };
