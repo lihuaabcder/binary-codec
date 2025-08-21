@@ -51,7 +51,7 @@ type BaseTypeMap = {
 
 export type DeepUnReadonly<T> = keyof T extends never
   ? T
-  : T extends ArrayBuffer ? T
+  : T extends Uint8Array ? T
     : { -readonly [k in keyof T]: DeepUnReadonly<T[k]> };
 
 export type Infer<T> = DeepUnReadonly<_Infer<T>>;
