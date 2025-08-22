@@ -181,4 +181,74 @@ describe('bitset', () => {
       }
     });
   });
+
+  describe('validateData', () => {
+    it('should pass validation for valid bitset data', () => {
+      const spec = {
+        name: 'bits',
+        type: 'bitset',
+        byteOffset: 0,
+        byteLength: 2
+      };
+
+      const validData = Array.from({
+        length: 16
+      }).fill(false).map((_, i) => i % 2 === 0);
+      const results = bitsetCodec.validateData!(spec as any, validData, 'config.bits', reg.resolver());
+      expect(results).toHaveLength(0);
+    });
+
+    it('should detect invalid bitset data type with correct path', () => {
+      const spec = {
+        name: 'bits',
+        type: 'bitset',
+        byteOffset: 0,
+        byteLength: 1
+      };
+
+      const results = bitsetCodec.validateData!(spec as any, 'not-an-array', 'data.bits', reg.resolver());
+      const fatalErrors = results.filter(r => r.level === ValidationLevel.FATAL);
+
+      expect(fatalErrors).toHaveLength(1);
+      expect(fatalErrors[0].code).toBe('INVALID_BITSET_DATA_TYPE');
+      expect(fatalErrors[0].message).toContain('Expected array');
+      expect(fatalErrors[0].path).toBe('data.bits');
+    });
+
+    it('should detect bitset length mismatch with correct path', () => {
+      const spec = {
+        name: 'bits',
+        type: 'bitset',
+        byteOffset: 0,
+        byteLength: 1
+      };
+
+      const invalidData = [true, false]; // Should have 8 elements for 1 byte
+      const results = bitsetCodec.validateData!(spec as any, invalidData, 'packet.flags', reg.resolver());
+      const errors = results.filter(r => r.level === ValidationLevel.ERROR);
+
+      expect(errors).toHaveLength(1);
+      expect(errors[0].code).toBe('BITSET_LENGTH_MISMATCH');
+      expect(errors[0].message).toContain('expected 8, got 2');
+      expect(errors[0].path).toBe('packet.flags');
+    });
+
+    it('should detect invalid bitset element types with correct path', () => {
+      const spec = {
+        name: 'bits',
+        type: 'bitset',
+        byteOffset: 0,
+        byteLength: 1
+      };
+
+      const invalidData = [true, false, 'invalid', true, false, true, false, true];
+      const results = bitsetCodec.validateData!(spec as any, invalidData, 'header.control.bits', reg.resolver());
+      const errors = results.filter(r => r.level === ValidationLevel.ERROR);
+
+      expect(errors).toHaveLength(1);
+      expect(errors[0].code).toBe('INVALID_BITSET_ELEMENT_TYPE');
+      expect(errors[0].message).toContain('Expected boolean at index 2');
+      expect(errors[0].path).toBe('header.control.bits[2]');
+    });
+  });
 });

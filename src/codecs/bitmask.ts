@@ -133,6 +133,82 @@ export const bitmaskCodec: Codec<BitmaskField, BitmaskReturn> = {
     }
 
     return results;
+  },
+  validateData: (spec, data, path, _ctx) => {
+    const results = [];
+
+    if (typeof data !== 'object' || data === null) {
+      results.push({
+        level: ValidationLevel.FATAL,
+        message: `Expected object for bitmask data, got ${typeof data}`,
+        path,
+        code: 'INVALID_BITMASK_DATA_TYPE'
+      });
+      return results;
+    }
+
+    const dataObj = data as Record<string, any>;
+
+    for (const [mapKey, bitField] of Object.entries(spec.map)) {
+      const fieldPath = `${path}.${mapKey}`;
+      const value = dataObj[mapKey];
+
+      if (value === undefined) {
+        continue; // Optional fields are allowed
+      }
+
+      // Validate based on bit field type
+      if (bitField.type === 'boolean') {
+        if (typeof value !== 'boolean') {
+          results.push({
+            level: ValidationLevel.ERROR,
+            message: `Expected boolean for field '${mapKey}', got ${typeof value}`,
+            path: fieldPath,
+            code: 'INVALID_BOOLEAN_FIELD'
+          });
+        }
+      } else if (bitField.type === 'uint') {
+        if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) {
+          results.push({
+            level: ValidationLevel.ERROR,
+            message: `Expected non-negative integer for field '${mapKey}', got ${value}`,
+            path: fieldPath,
+            code: 'INVALID_UINT_FIELD'
+          });
+        } else {
+          // Check if value fits in the bit range
+          const bits = bitField.bits;
+          const bitWidth = Array.isArray(bits) ? bits[0] - bits[1] + 1 : 1;
+          const maxValue = (1 << bitWidth) - 1;
+          if (value > maxValue) {
+            results.push({
+              level: ValidationLevel.ERROR,
+              message: `Value ${value} exceeds maximum ${maxValue} for ${bitWidth}-bit field '${mapKey}'`,
+              path: fieldPath,
+              code: 'VALUE_OUT_OF_RANGE'
+            });
+          }
+        }
+      } else if (bitField.type === 'enum') {
+        if (typeof value !== 'string') {
+          results.push({
+            level: ValidationLevel.ERROR,
+            message: `Expected string for enum field '${mapKey}', got ${typeof value}`,
+            path: fieldPath,
+            code: 'INVALID_ENUM_FIELD_TYPE'
+          });
+        } else if (!bitField.values.includes(value)) {
+          results.push({
+            level: ValidationLevel.ERROR,
+            message: `Invalid enum value '${value}' for field '${mapKey}'. Valid values: ${bitField.values.join(', ')}`,
+            path: fieldPath,
+            code: 'INVALID_ENUM_VALUE'
+          });
+        }
+      }
+    }
+
+    return results;
   }
 };
 

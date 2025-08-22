@@ -75,5 +75,44 @@ export const stringCodec: Codec<StringField, string> = {
     }
 
     return results;
+  },
+  validateData: (spec, data, path, _ctx) => {
+    const results = [];
+
+    if (typeof data !== 'string') {
+      results.push({
+        level: ValidationLevel.FATAL,
+        message: `Expected string for string field, got ${typeof data}`,
+        path,
+        code: 'INVALID_STRING_DATA_TYPE'
+      });
+      return results;
+    }
+
+    const { byteLength, encoding = 'utf-8' } = spec;
+
+    // Check if the string can be encoded within the byte length limit
+    try {
+      const encoder = new TextEncoder();
+      const encoded = encoder.encode(data);
+      if (encoded.length > byteLength) {
+        results.push({
+          level: ValidationLevel.WARNING,
+          message: `String too long: encoded length ${encoded.length} exceeds field length ${byteLength}`,
+          path,
+          code: 'STRING_TOO_LONG'
+        });
+      }
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    } catch (_error) {
+      results.push({
+        level: ValidationLevel.ERROR,
+        message: `Failed to encode string with encoding ${encoding}`,
+        path,
+        code: 'STRING_ENCODING_ERROR'
+      });
+    }
+
+    return results;
   }
 };

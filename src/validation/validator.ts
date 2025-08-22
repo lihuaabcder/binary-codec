@@ -4,14 +4,19 @@ import type { ValidationResult } from './types.ts';
 import { ValidationLevel } from './types.ts';
 
 export class ValidationError extends Error {
-  constructor(public results: ValidationResult[]) {
-    super(`Validation failed with ${results.length} error(s)`);
+  constructor(message: string, public results: ValidationResult[]) {
+    super(message);
     this.name = 'ValidationError';
   }
 }
 
+// ========================================
+// STATIC CONFIGURATION VALIDATION
+// ========================================
+
 /**
  * Static validation of codec spec structure using registry-based codec validators
+ * Checks configuration correctness without requiring actual data
  */
 export function validateCodecSpec(spec: CodecSpec, registry: CodecRegistry): ValidationResult[] {
   const results: ValidationResult[] = [];
@@ -159,14 +164,56 @@ function validateFieldInteractions(fields: Field[]): ValidationResult[] {
   return results;
 }
 
+// ========================================
+// RUNTIME DATA VALIDATION
+// ========================================
+
 /**
- * Runtime validation during deserialization
- * Only checks critical issues that could cause crashes
+ * Runtime validation of actual data against codec specification
+ * Checks if data conforms to the configuration requirements
  */
-export function validateRuntime(spec: CodecSpec, buffer: Uint8Array): ValidationResult[] {
+export function validateRuntimeData(
+  spec: CodecSpec | Field,
+  data: unknown,
+  registry: CodecRegistry,
+  path: string = ''
+): ValidationResult[] {
+  // For CodecSpec, validate as object field
+  if ('fields' in spec) {
+    const objectCodec = registry.get('object');
+    if (objectCodec.validateData) {
+      return objectCodec.validateData(spec as any, data, path, registry.resolver());
+    }
+    return [];
+  }
+
+  // For individual Field, delegate to specific codec
+  const field = spec as Field;
+  try {
+    const codec = registry.get(field.type);
+    if (codec.validateData) {
+      return codec.validateData(field as any, data, path, registry.resolver());
+    }
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  } catch (_error) {
+    return [{
+      level: ValidationLevel.FATAL,
+      message: `Unknown field type for data validation: ${field.type}`,
+      path: `${path}.type`,
+      code: 'UNKNOWN_FIELD_TYPE_DATA'
+    }];
+  }
+
+  return [];
+}
+
+/**
+ * Buffer size validation during deserialization
+ * Checks if buffer is large enough for the operation
+ */
+export function validateBufferSize(spec: CodecSpec, buffer: Uint8Array): ValidationResult[] {
   const results: ValidationResult[] = [];
 
-  // Check buffer size
   if (buffer.length < spec.byteLength) {
     results.push({
       level: ValidationLevel.FATAL,
@@ -178,6 +225,10 @@ export function validateRuntime(spec: CodecSpec, buffer: Uint8Array): Validation
 
   return results;
 }
+
+// ========================================
+// VALIDATION RESULT PROCESSING
+// ========================================
 
 /**
  * Process validation results based on options
@@ -199,6 +250,9 @@ export function processValidationResults(
   // Check for fatal errors
   const fatalResults = results.filter(r => r.level === ValidationLevel.FATAL);
   if (fatalResults.length > 0 && throwOnFatal) {
-    throw new ValidationError(fatalResults);
+    const errorType = fatalResults[0].code?.includes('DATA') ? 'Data validation' : 'Configuration validation';
+    throw new ValidationError(`${errorType} failed with ${fatalResults.length} fatal error(s)`, fatalResults);
   }
+
+  // todo log other type error
 }

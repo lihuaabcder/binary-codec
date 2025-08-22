@@ -33,7 +33,8 @@ export default antfu(
       'ts/no-namespace': ['error', {
         allowDeclarations: true
       }],
-      'ts/consistent-type-definitions': 'off'
+      'ts/consistent-type-definitions': 'off',
+      'prefer-exponentiation-operator': 'off'
     }
   }
 );

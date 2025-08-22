@@ -97,7 +97,7 @@ describe('string', () => {
           byteLength: 5
         },
         value,
-        reg
+        reg.resolver()
       );
 
       expect(viewToArray(view)).toEqual([0x48, 0x65, 0x6C, 0x6C, 0x6F]);
@@ -114,7 +114,7 @@ describe('string', () => {
           byteLength: 4
         },
         value,
-        reg
+        reg.resolver()
       );
 
       expect(viewToArray(view)).toEqual([0x48, 0x65, 0x6C, 0x6C]);
@@ -131,7 +131,7 @@ describe('string', () => {
           byteLength: 6
         },
         value,
-        reg
+        reg.resolver()
       );
 
       expect(viewToArray(view)).toEqual([0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x00]);
@@ -177,6 +177,55 @@ describe('string', () => {
 
       const results = stringCodec.validate!(validSpec, 'test', dummyCtx);
       expect(results).toHaveLength(0);
+    });
+  });
+
+  describe('validateData', () => {
+    it('should pass validation for valid string data', () => {
+      const spec = {
+        name: 'message',
+        type: 'string',
+        byteOffset: 0,
+        byteLength: 10,
+        encoding: 'utf-8'
+      };
+
+      const results = stringCodec.validateData!(spec as any, 'Hello', 'test.message', dummyCtx);
+      expect(results).toHaveLength(0);
+    });
+
+    it('should detect invalid string type with correct path', () => {
+      const spec = {
+        name: 'message',
+        type: 'string',
+        byteOffset: 0,
+        byteLength: 10
+      };
+
+      const results = stringCodec.validateData!(spec as any, 123, 'data.config.message', dummyCtx);
+      const fatalErrors = results.filter(r => r.level === ValidationLevel.FATAL);
+
+      expect(fatalErrors).toHaveLength(1);
+      expect(fatalErrors[0].code).toBe('INVALID_STRING_DATA_TYPE');
+      expect(fatalErrors[0].message).toContain('Expected string');
+      expect(fatalErrors[0].path).toBe('data.config.message');
+    });
+
+    it('should detect string too long with correct path', () => {
+      const spec = {
+        name: 'short',
+        type: 'string',
+        byteOffset: 0,
+        byteLength: 5
+      };
+
+      const results = stringCodec.validateData!(spec as any, 'This string is too long for the field', 'root.short', dummyCtx);
+      const warnings = results.filter(r => r.level === ValidationLevel.WARNING);
+
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0].code).toBe('STRING_TOO_LONG');
+      expect(warnings[0].message).toContain('String too long');
+      expect(warnings[0].path).toBe('root.short');
     });
   });
 });

@@ -27,5 +27,31 @@ export const rawCodec: Codec<RawField, Uint8Array> = {
     }
 
     return results;
+  },
+  validateData: (spec, data, path, _ctx) => {
+    const results = [];
+
+    if (!(data instanceof Uint8Array)) {
+      results.push({
+        level: ValidationLevel.FATAL,
+        message: `Expected Uint8Array for raw field, got ${typeof data}`,
+        path,
+        code: 'INVALID_RAW_DATA_TYPE'
+      });
+      return results;
+    }
+
+    const { byteLength } = spec;
+
+    if (data.length !== byteLength) {
+      results.push({
+        level: ValidationLevel.ERROR,
+        message: `Raw data length mismatch: expected ${byteLength}, got ${data.length}`,
+        path,
+        code: 'RAW_DATA_LENGTH_MISMATCH'
+      });
+    }
+
+    return results;
   }
 };

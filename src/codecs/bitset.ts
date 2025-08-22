@@ -91,5 +91,44 @@ export const bitsetCodec: Codec<BitsetField, boolean[]> = {
     }
 
     return results;
+  },
+  validateData: (spec, data, path, _ctx) => {
+    const results = [];
+
+    if (!Array.isArray(data)) {
+      results.push({
+        level: ValidationLevel.FATAL,
+        message: `Expected array for bitset field, got ${typeof data}`,
+        path,
+        code: 'INVALID_BITSET_DATA_TYPE'
+      });
+      return results;
+    }
+
+    const { byteLength } = spec;
+    const expectedLength = byteLength * 8;
+
+    if (data.length !== expectedLength) {
+      results.push({
+        level: ValidationLevel.ERROR,
+        message: `Bitset length mismatch: expected ${expectedLength}, got ${data.length}`,
+        path,
+        code: 'BITSET_LENGTH_MISMATCH'
+      });
+    }
+
+    // Check that all elements are boolean
+    data.forEach((value, index) => {
+      if (typeof value !== 'boolean') {
+        results.push({
+          level: ValidationLevel.ERROR,
+          message: `Expected boolean at index ${index}, got ${typeof value}`,
+          path: `${path}[${index}]`,
+          code: 'INVALID_BITSET_ELEMENT_TYPE'
+        });
+      }
+    });
+
+    return results;
   }
 };

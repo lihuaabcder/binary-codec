@@ -141,4 +141,54 @@ describe('raw', () => {
       }
     });
   });
+
+  describe('validateData', () => {
+    it('should pass validation for valid raw data', () => {
+      const spec = {
+        name: 'bytes',
+        type: 'raw',
+        byteOffset: 0,
+        byteLength: 4
+      };
+
+      const validData = new Uint8Array([1, 2, 3, 4]);
+      const results = rawCodec.validateData!(spec as any, validData, 'packet.bytes', dummyCtx);
+      expect(results).toHaveLength(0);
+    });
+
+    it('should detect invalid raw data type with correct path', () => {
+      const spec = {
+        name: 'bytes',
+        type: 'raw',
+        byteOffset: 0,
+        byteLength: 4
+      };
+
+      const results = rawCodec.validateData!(spec as any, [1, 2, 3, 4], 'data.raw.bytes', dummyCtx);
+      const fatalErrors = results.filter(r => r.level === ValidationLevel.FATAL);
+
+      expect(fatalErrors).toHaveLength(1);
+      expect(fatalErrors[0].code).toBe('INVALID_RAW_DATA_TYPE');
+      expect(fatalErrors[0].message).toContain('Expected Uint8Array');
+      expect(fatalErrors[0].path).toBe('data.raw.bytes');
+    });
+
+    it('should detect raw data length mismatch with correct path', () => {
+      const spec = {
+        name: 'bytes',
+        type: 'raw',
+        byteOffset: 0,
+        byteLength: 4
+      };
+
+      const invalidData = new Uint8Array([1, 2]); // Wrong length
+      const results = rawCodec.validateData!(spec as any, invalidData, 'header.checksum', dummyCtx);
+      const errors = results.filter(r => r.level === ValidationLevel.ERROR);
+
+      expect(errors).toHaveLength(1);
+      expect(errors[0].code).toBe('RAW_DATA_LENGTH_MISMATCH');
+      expect(errors[0].message).toContain('expected 4, got 2');
+      expect(errors[0].path).toBe('header.checksum');
+    });
+  });
 });
