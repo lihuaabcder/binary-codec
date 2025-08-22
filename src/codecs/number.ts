@@ -110,5 +110,77 @@ export const numberCodec: Codec<NumberField, number> = {
     }
 
     return results;
+  },
+  validateData: (spec, data, path, _ctx) => {
+    const results = [];
+
+    if (typeof data !== 'number') {
+      results.push({
+        level: ValidationLevel.FATAL,
+        message: `Expected number for number field, got ${typeof data}`,
+        path,
+        code: 'INVALID_NUMBER_DATA_TYPE'
+      });
+      return results;
+    }
+
+    const { numberType, byteLength } = spec;
+
+    // Validate based on number type
+    if (numberType === 'uint') {
+      if (!Number.isInteger(data) || data < 0) {
+        results.push({
+          level: ValidationLevel.ERROR,
+          message: `Expected non-negative integer for uint field, got ${data}`,
+          path,
+          code: 'INVALID_UINT_VALUE'
+        });
+      } else {
+        // Check range for unsigned integers
+        const maxValue = Math.pow(2, byteLength * 8) - 1;
+        if (data > maxValue) {
+          results.push({
+            level: ValidationLevel.ERROR,
+            message: `Value ${data} exceeds maximum ${maxValue} for ${byteLength}-byte uint`,
+            path,
+            code: 'UINT_VALUE_OUT_OF_RANGE'
+          });
+        }
+      }
+    } else if (numberType === 'int') {
+      if (!Number.isInteger(data)) {
+        results.push({
+          level: ValidationLevel.ERROR,
+          message: `Expected integer for int field, got ${data}`,
+          path,
+          code: 'INVALID_INT_VALUE'
+        });
+      } else {
+        // Check range for signed integers
+        const maxValue = Math.pow(2, byteLength * 8 - 1) - 1;
+        const minValue = -Math.pow(2, byteLength * 8 - 1);
+        if (data > maxValue || data < minValue) {
+          results.push({
+            level: ValidationLevel.ERROR,
+            message: `Value ${data} is out of range [${minValue}, ${maxValue}] for ${byteLength}-byte int`,
+            path,
+            code: 'INT_VALUE_OUT_OF_RANGE'
+          });
+        }
+      }
+    } else if (numberType === 'float') {
+      if (!Number.isFinite(data)) {
+        results.push({
+          level: ValidationLevel.WARNING,
+          message: `Float value ${data} is not finite`,
+          path,
+          code: 'NON_FINITE_FLOAT_VALUE'
+        });
+      }
+      // Note: For 32-bit floats, we could check if the value can be represented exactly,
+      // but that's quite complex and might not be necessary for most use cases
+    }
+
+    return results;
   }
 };

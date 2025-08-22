@@ -42,6 +42,7 @@ export type Codec<S extends MetaField<any>, V> = {
   read: (view: DataView, spec: Omit<S, 'name' | 'type'>, ctx: Resolver) => V
   write?: (view: DataView, spec: Omit<S, 'name' | 'type'>, value: V, ctx: Resolver) => void
   validate?: (spec: S, path: string, ctx: Resolver) => ValidationResult[]
+  validateData?: (spec: S, data: unknown, path: string, ctx: Resolver) => ValidationResult[]
 };
 
 type BaseTypeMap = {

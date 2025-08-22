@@ -121,5 +121,59 @@ export const arrayCodec: Codec<ArrayField, unknown[]> = {
     }
 
     return results;
+  },
+  validateData: (spec, data, path, ctx) => {
+    const results = [];
+
+    if (!Array.isArray(data)) {
+      results.push({
+        level: ValidationLevel.FATAL,
+        message: `Expected array for array field, got ${typeof data}`,
+        path,
+        code: 'INVALID_ARRAY_DATA_TYPE'
+      });
+      return results;
+    }
+
+    const { byteLength, item } = spec;
+    const { byteLength: itemByteLength } = item;
+    const expectedLength = byteLength / itemByteLength;
+
+    // Check array length
+    if (data.length !== expectedLength) {
+      results.push({
+        level: ValidationLevel.ERROR,
+        message: `Array length mismatch: expected ${expectedLength}, got ${data.length}`,
+        path,
+        code: 'ARRAY_LENGTH_MISMATCH'
+      });
+    }
+
+    // Validate each array item
+    data.forEach((itemData, index) => {
+      const itemPath = `${path}[${index}]`;
+      try {
+        const codec = ctx.get(item.type);
+        if (codec.validateData) {
+          // Create a mock field spec for the item to validate
+          const itemFieldSpec = {
+            name: 'arrayItem',
+            ...item
+          };
+          const itemValidationResults = codec.validateData(itemFieldSpec as any, itemData, itemPath, ctx);
+          results.push(...itemValidationResults);
+        }
+      // eslint-disable-next-line unused-imports/no-unused-vars
+      } catch (_error) {
+        results.push({
+          level: ValidationLevel.FATAL,
+          message: `Unknown array item type for data validation: ${item.type}`,
+          path: itemPath,
+          code: 'UNKNOWN_ARRAY_ITEM_TYPE_DATA'
+        });
+      }
+    });
+
+    return results;
   }
 };

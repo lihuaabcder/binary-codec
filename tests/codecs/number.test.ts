@@ -331,4 +331,124 @@ describe('number', () => {
       }
     });
   });
+
+  describe('validateData', () => {
+    it('should pass validation for valid number data', () => {
+      const specs = [
+        {
+          name: 'uint8',
+          type: 'number',
+          numberType: 'uint',
+          byteOffset: 0,
+          byteLength: 1
+        },
+        {
+          name: 'int16',
+          type: 'number',
+          numberType: 'int',
+          byteOffset: 0,
+          byteLength: 2
+        },
+        {
+          name: 'float32',
+          type: 'number',
+          numberType: 'float',
+          byteOffset: 0,
+          byteLength: 4
+        }
+      ];
+
+      const validData = [255, -32768, 3.14];
+
+      specs.forEach((spec, index) => {
+        const results = numberCodec.validateData!(spec as any, validData[index], 'test', dummyCtx);
+        expect(results).toHaveLength(0);
+      });
+    });
+
+    it('should detect invalid number types', () => {
+      const spec = {
+        name: 'value',
+        type: 'number',
+        numberType: 'uint',
+        byteOffset: 0,
+        byteLength: 4
+      };
+
+      const results = numberCodec.validateData!(spec as any, 'not-a-number', 'test', dummyCtx);
+      const fatalErrors = results.filter(r => r.level === ValidationLevel.FATAL);
+
+      expect(fatalErrors).toHaveLength(1);
+      expect(fatalErrors[0].code).toBe('INVALID_NUMBER_DATA_TYPE');
+      expect(fatalErrors[0].message).toContain('Expected number');
+    });
+
+    it('should detect uint out of range', () => {
+      const spec = {
+        name: 'byte',
+        type: 'number',
+        numberType: 'uint',
+        byteOffset: 0,
+        byteLength: 1
+      };
+
+      const results = numberCodec.validateData!(spec as any, 256, 'test', dummyCtx);
+      const errors = results.filter(r => r.level === ValidationLevel.ERROR);
+
+      expect(errors).toHaveLength(1);
+      expect(errors[0].code).toBe('UINT_VALUE_OUT_OF_RANGE');
+      expect(errors[0].message).toContain('exceeds maximum 255');
+    });
+
+    it('should detect negative uint', () => {
+      const spec = {
+        name: 'value',
+        type: 'number',
+        numberType: 'uint',
+        byteOffset: 0,
+        byteLength: 4
+      };
+
+      const results = numberCodec.validateData!(spec as any, -1, 'test', dummyCtx);
+      const errors = results.filter(r => r.level === ValidationLevel.ERROR);
+
+      expect(errors).toHaveLength(1);
+      expect(errors[0].code).toBe('INVALID_UINT_VALUE');
+      expect(errors[0].message).toContain('non-negative integer');
+    });
+
+    it('should detect int out of range', () => {
+      const spec = {
+        name: 'byte',
+        type: 'number',
+        numberType: 'int',
+        byteOffset: 0,
+        byteLength: 1
+      };
+
+      const results = numberCodec.validateData!(spec as any, 128, 'test', dummyCtx);
+      const errors = results.filter(r => r.level === ValidationLevel.ERROR);
+
+      expect(errors).toHaveLength(1);
+      expect(errors[0].code).toBe('INT_VALUE_OUT_OF_RANGE');
+      expect(errors[0].message).toContain('out of range');
+    });
+
+    it('should detect non-finite float', () => {
+      const spec = {
+        name: 'value',
+        type: 'number',
+        numberType: 'float',
+        byteOffset: 0,
+        byteLength: 4
+      };
+
+      const results = numberCodec.validateData!(spec as any, Number.POSITIVE_INFINITY, 'test', dummyCtx);
+      const warnings = results.filter(r => r.level === ValidationLevel.WARNING);
+
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0].code).toBe('NON_FINITE_FLOAT_VALUE');
+      expect(warnings[0].message).toContain('not finite');
+    });
+  });
 });

@@ -729,4 +729,172 @@ describe('bitmask', () => {
       expect(results[0].message).toContain('Bit position 10 exceeds field size (8 bits)');
     });
   });
+
+  describe('validateData', () => {
+    it('should pass validation for valid bitmask data', () => {
+      const spec = {
+        name: 'flags',
+        type: 'bitmask',
+        byteOffset: 0,
+        byteLength: 2,
+        map: {
+          enabled: {
+            bits: 0,
+            type: 'boolean'
+          },
+          priority: {
+            bits: [7, 4],
+            type: 'uint'
+          },
+          status: {
+            bits: [11, 8],
+            type: 'enum',
+            values: ['idle', 'active', 'pending', 'error']
+          }
+        }
+      };
+
+      const validData = {
+        enabled: true,
+        priority: 5,
+        status: 'active'
+      };
+
+      const results = bitmaskCodec.validateData!(spec as any, validData, 'config.flags', reg.resolver());
+      expect(results).toHaveLength(0);
+    });
+
+    it('should detect invalid bitmask data type with correct path', () => {
+      const spec = {
+        name: 'flags',
+        type: 'bitmask',
+        byteOffset: 0,
+        byteLength: 1,
+        map: {
+          flag: {
+            bits: 0,
+            type: 'boolean'
+          }
+        }
+      };
+
+      const results = bitmaskCodec.validateData!(spec as any, 'not-an-object', 'data.flags', reg.resolver());
+      const fatalErrors = results.filter(r => r.level === ValidationLevel.FATAL);
+
+      expect(fatalErrors).toHaveLength(1);
+      expect(fatalErrors[0].code).toBe('INVALID_BITMASK_DATA_TYPE');
+      expect(fatalErrors[0].message).toContain('Expected object');
+      expect(fatalErrors[0].path).toBe('data.flags');
+    });
+
+    it('should detect invalid boolean field with correct path', () => {
+      const spec = {
+        name: 'flags',
+        type: 'bitmask',
+        byteOffset: 0,
+        byteLength: 1,
+        map: {
+          enabled: {
+            bits: 0,
+            type: 'boolean'
+          }
+        }
+      };
+
+      const invalidData = {
+        enabled: 'yes'
+      };
+
+      const results = bitmaskCodec.validateData!(spec as any, invalidData, 'root.flags', reg.resolver());
+      const errors = results.filter(r => r.level === ValidationLevel.ERROR);
+
+      expect(errors).toHaveLength(1);
+      expect(errors[0].code).toBe('INVALID_BOOLEAN_FIELD');
+      expect(errors[0].message).toContain('Expected boolean');
+      expect(errors[0].path).toBe('root.flags.enabled');
+    });
+
+    it('should detect uint value out of range with correct path', () => {
+      const spec = {
+        name: 'flags',
+        type: 'bitmask',
+        byteOffset: 0,
+        byteLength: 1,
+        map: {
+          value: {
+            bits: [2, 0], // 3 bits = max value 7
+            type: 'uint'
+          }
+        }
+      };
+
+      const invalidData = {
+        value: 8 // Exceeds 3-bit range
+      };
+
+      const results = bitmaskCodec.validateData!(spec as any, invalidData, 'packet.header.flags', reg.resolver());
+      const errors = results.filter(r => r.level === ValidationLevel.ERROR);
+
+      expect(errors).toHaveLength(1);
+      expect(errors[0].code).toBe('VALUE_OUT_OF_RANGE');
+      expect(errors[0].message).toContain('exceeds maximum 7');
+      expect(errors[0].path).toBe('packet.header.flags.value');
+    });
+
+    it('should detect invalid enum value with correct path', () => {
+      const spec = {
+        name: 'flags',
+        type: 'bitmask',
+        byteOffset: 0,
+        byteLength: 1,
+        map: {
+          status: {
+            bits: [2, 0],
+            type: 'enum',
+            values: ['idle', 'active', 'pending']
+          }
+        }
+      };
+
+      const invalidData = {
+        status: 'invalid'
+      };
+
+      const results = bitmaskCodec.validateData!(spec as any, invalidData, 'system.status.flags', reg.resolver());
+      const errors = results.filter(r => r.level === ValidationLevel.ERROR);
+
+      expect(errors).toHaveLength(1);
+      expect(errors[0].code).toBe('INVALID_ENUM_VALUE');
+      expect(errors[0].message).toContain('Invalid enum value');
+      expect(errors[0].message).toContain('idle, active, pending');
+      expect(errors[0].path).toBe('system.status.flags.status');
+    });
+
+    it('should allow optional fields (undefined values)', () => {
+      const spec = {
+        name: 'flags',
+        type: 'bitmask',
+        byteOffset: 0,
+        byteLength: 1,
+        map: {
+          enabled: {
+            bits: 0,
+            type: 'boolean'
+          },
+          priority: {
+            bits: [3, 1],
+            type: 'uint'
+          }
+        }
+      };
+
+      const partialData = {
+        enabled: true
+        // priority is undefined/missing
+      };
+
+      const results = bitmaskCodec.validateData!(spec as any, partialData, 'config.flags', reg.resolver());
+      expect(results).toHaveLength(0);
+    });
+  });
 });

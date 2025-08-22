@@ -1,6 +1,7 @@
 import type { CodecRegistry } from './registry.ts';
 import { arrayCodec } from '../codecs/array.ts';
 import { bitmaskCodec } from '../codecs/bitmask.ts';
+import { bitsetCodec } from '../codecs/bitset.ts';
 import { numberCodec } from '../codecs/number.ts';
 import { objectCodec } from '../codecs/object.ts';
 import { rawCodec } from '../codecs/raw.ts';
@@ -12,5 +13,6 @@ export function installAll(registry: CodecRegistry): void {
   registry.install(numberCodec);
   registry.install(arrayCodec);
   registry.install(bitmaskCodec);
+  registry.install(bitsetCodec);
   registry.install(objectCodec);
 }

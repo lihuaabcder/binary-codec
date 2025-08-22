@@ -452,4 +452,156 @@ describe('array', () => {
       expect(results[0].path).toBe('testArray.item.map.invalidField');
     });
   });
+
+  describe('validateData', () => {
+    it('should pass validation for valid array data', () => {
+      const spec = {
+        name: 'numbers',
+        type: 'array',
+        byteOffset: 0,
+        byteLength: 12,
+        item: {
+          type: 'number',
+          numberType: 'uint',
+          byteLength: 4
+        }
+      };
+
+      const validData = [1, 2, 3];
+      const results = arrayCodec.validateData!(spec as any, validData, 'packet.numbers', reg.resolver());
+      expect(results).toHaveLength(0);
+    });
+
+    it('should detect invalid array type with correct path', () => {
+      const spec = {
+        name: 'data',
+        type: 'array',
+        byteOffset: 0,
+        byteLength: 8,
+        item: {
+          type: 'number',
+          numberType: 'uint',
+          byteLength: 4
+        }
+      };
+
+      const results = arrayCodec.validateData!(spec as any, 'not-an-array', 'config.data', reg.resolver());
+      const fatalErrors = results.filter(r => r.level === ValidationLevel.FATAL);
+
+      expect(fatalErrors).toHaveLength(1);
+      expect(fatalErrors[0].code).toBe('INVALID_ARRAY_DATA_TYPE');
+      expect(fatalErrors[0].message).toContain('Expected array');
+      expect(fatalErrors[0].path).toBe('config.data');
+    });
+
+    it('should detect array length mismatch with correct path', () => {
+      const spec = {
+        name: 'numbers',
+        type: 'array',
+        byteOffset: 0,
+        byteLength: 8,
+        item: {
+          type: 'number',
+          numberType: 'uint',
+          byteLength: 4
+        }
+      };
+
+      const invalidData = [1, 2, 3]; // Should have 2 elements (8/4)
+      const results = arrayCodec.validateData!(spec as any, invalidData, 'header.numbers', reg.resolver());
+      const errors = results.filter(r => r.level === ValidationLevel.ERROR);
+
+      expect(errors).toHaveLength(1);
+      expect(errors[0].code).toBe('ARRAY_LENGTH_MISMATCH');
+      expect(errors[0].message).toContain('expected 2, got 3');
+      expect(errors[0].path).toBe('header.numbers');
+    });
+
+    it('should validate array elements recursively with indexed paths', () => {
+      const spec = {
+        name: 'numbers',
+        type: 'array',
+        byteOffset: 0,
+        byteLength: 8,
+        item: {
+          type: 'number',
+          numberType: 'uint',
+          byteLength: 4
+        }
+      };
+
+      const invalidData = [1, 'invalid']; // Second element is not a number
+      const results = arrayCodec.validateData!(spec as any, invalidData, 'data.numbers', reg.resolver());
+      const fatalErrors = results.filter(r => r.level === ValidationLevel.FATAL);
+
+      expect(fatalErrors).toHaveLength(1);
+      expect(fatalErrors[0].code).toBe('INVALID_NUMBER_DATA_TYPE');
+      expect(fatalErrors[0].path).toBe('data.numbers[1]');
+    });
+
+    it('should validate nested bitmask array elements with correct paths', () => {
+      const spec = {
+        name: 'flags',
+        type: 'array',
+        byteOffset: 0,
+        byteLength: 4,
+        item: {
+          type: 'bitmask',
+          byteLength: 2,
+          map: {
+            enabled: {
+              bits: 0,
+              type: 'boolean'
+            },
+            priority: {
+              bits: [7, 4],
+              type: 'uint'
+            }
+          }
+        }
+      };
+
+      const invalidData = [
+        {
+          enabled: true,
+          priority: 5
+        }, // Valid
+        {
+          enabled: 'not-boolean',
+          priority: 16
+        } // Invalid - boolean type and value out of range
+      ];
+
+      const results = arrayCodec.validateData!(spec as any, invalidData, 'config.flags', reg.resolver());
+      const errors = results.filter(r => r.level === ValidationLevel.ERROR);
+
+      expect(errors.length).toBeGreaterThanOrEqual(2);
+
+      const booleanError = errors.find(r => r.path === 'config.flags[1].enabled');
+      const rangeError = errors.find(r => r.path === 'config.flags[1].priority');
+
+      expect(booleanError?.code).toBe('INVALID_BOOLEAN_FIELD');
+      expect(rangeError?.code).toBe('VALUE_OUT_OF_RANGE');
+    });
+
+    it('should handle unknown array item type gracefully', () => {
+      const spec = {
+        name: 'data',
+        type: 'array',
+        byteOffset: 0,
+        byteLength: 8,
+        item: {
+          type: 'nonexistent',
+          byteLength: 4
+        }
+      };
+
+      const data = [1, 2];
+      const results = arrayCodec.validateData!(spec as any, data, 'test.data', reg.resolver());
+
+      expect(results.length).toBeGreaterThan(0);
+      const fatalErrors = results.filter(r => r.level === ValidationLevel.FATAL);
+      expect(fatalErrors.some(r => r.code === 'UNKNOWN_ARRAY_ITEM_TYPE_DATA')).toBe(true);
+    });
+  });
 });
