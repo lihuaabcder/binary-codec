@@ -1,6 +1,6 @@
 import type { CodecRegistry } from '../registry/registry.ts';
 import type { CodecSpec, Field } from '../types.ts';
-import type { ValidationResult } from './types.ts';
+import type { ValidationLogger, ValidationResult } from './types.ts';
 import { ValidationLevel } from './types.ts';
 
 export class ValidationError extends Error {
@@ -233,10 +233,30 @@ export function validateBufferSize(spec: CodecSpec, buffer: Uint8Array): Validat
 /**
  * Process validation results based on options
  */
+
+const defaultLogger: ValidationLogger = {
+  log: (level, result) => {
+    switch (level) {
+      case ValidationLevel.FATAL:
+        console.error(`[FATAL] ${result.code} @ ${result.path} - ${result.message}`);
+        break;
+      case ValidationLevel.ERROR:
+        console.error(`[ERROR] ${result.code} @ ${result.path} - ${result.message}`);
+        break;
+      case ValidationLevel.WARNING:
+        console.warn(`[WARN] ${result.code} @ ${result.path} - ${result.message}`);
+        break;
+      default:
+        console.info(`[INFO] ${result.code} @ ${result.path} - ${result.message}`);
+    }
+  }
+};
+
 export function processValidationResults(
   results: ValidationResult[],
   throwOnFatal: boolean = true,
-  onValidation?: (results: ValidationResult[]) => void
+  onValidation?: (results: ValidationResult[]) => void,
+  logger: ValidationLogger = defaultLogger
 ): void {
   if (results.length === 0) {
     return;
@@ -246,6 +266,10 @@ export function processValidationResults(
   if (onValidation) {
     onValidation(results);
   }
+
+  results.forEach(r => {
+    logger.log(r.level, r);
+  });
 
   // Check for fatal errors
   const fatalResults = results.filter(r => r.level === ValidationLevel.FATAL);

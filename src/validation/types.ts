@@ -17,3 +17,7 @@ export type ValidationOptions = {
   onValidation?: (results: ValidationResult[]) => void
   throwOnFatal?: boolean // Default: true
 };
+
+export interface ValidationLogger {
+  log: (level: ValidationLevel, result: ValidationResult) => void
+}
