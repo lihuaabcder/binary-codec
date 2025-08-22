@@ -38,10 +38,12 @@ yarn add binary-codec
 ### Basic Usage
 
 ```ts
+import type { CodecSpec } from 'binary-codec';
 import { deserialize, serialize } from 'binary-codec';
 
 // Define your data structure
 const packetSpec = {
+  byteLength: 21,
   fields: [
     {
       name: 'id',
@@ -73,7 +75,7 @@ const packetSpec = {
       }
     }
   ]
-} as const;
+} as const satisfies CodecSpec;
 
 // Deserialize binary data
 const buffer = new ArrayBuffer(21);
@@ -388,6 +390,7 @@ Get precise TypeScript types automatically from your configuration:
 import { Infer } from 'binary-codec';
 
 const packetSpec = {
+  byteLength: 13,
   fields: [
     {
       name: 'id',
@@ -424,7 +427,7 @@ const packetSpec = {
       }
     }
   ]
-} as const;
+} as const satisfies CodecSpec;
 
 // Automatically inferred type:
 type PacketType = Infer<typeof packetSpec>;
@@ -486,7 +489,10 @@ Control byte order for multi-byte values:
 ### Network Protocol Parsing
 
 ```ts
+import type { CodecSpec } from 'binary-codec';
+
 const tcpHeaderSpec = {
+  byteLength: 14,
   fields: [
     {
       name: 'srcPort',
@@ -549,7 +555,7 @@ const tcpHeaderSpec = {
       }
     }
   ]
-} as const;
+} as const satisfies CodecSpec;
 
 const header = deserialize(packetBuffer, tcpHeaderSpec);
 console.log(header.flags.syn); // boolean
@@ -559,6 +565,7 @@ console.log(header.flags.syn); // boolean
 
 ```ts
 const bmpHeaderSpec = {
+  byteLength: 26,
   fields: [
     {
       name: 'signature',
