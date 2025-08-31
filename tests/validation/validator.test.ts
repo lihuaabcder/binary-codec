@@ -1,9 +1,7 @@
 import type { CodecSpec } from '../../src/types.ts';
+import { getDefaultRegistry, serialize, ValidationLevel } from 'binary-codec';
 import { describe, expect, it } from 'vitest';
-import { serialize } from '../../src/entries/index.ts';
-import { getDefaultRegistry } from '../../src/registry/default.ts';
-import { ValidationLevel } from '../../src/validation/types.ts';
-import { processValidationResults, validateCodecSpec, validateRuntimeData, ValidationError } from '../../src/validation/validator.ts';
+import { processValidationResults, validateCodecSpec, validateRuntimeData, ValidationError } from '../../src/validation/validator';
 
 const registry = getDefaultRegistry();
 

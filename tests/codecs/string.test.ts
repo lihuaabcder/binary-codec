@@ -1,8 +1,6 @@
+import { rawCodec, stringCodec, ValidationLevel } from 'binary-codec';
 import { describe, expect, it } from 'vitest';
-import { rawCodec } from '../../src/codecs/raw.ts';
-import { stringCodec } from '../../src/codecs/string.ts';
-import { ValidationLevel } from '../../src/validation/types.ts';
-import { createTestRegistry, dummyCtx, toPlainView, toView, viewToArray } from '../helper.ts';
+import { createTestRegistry, dummyCtx, toPlainView, toView, viewToArray } from '../helper';
 
 const reg = createTestRegistry([rawCodec]);
 

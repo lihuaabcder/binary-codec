@@ -1,9 +1,7 @@
-import type { BitmaskMap } from '../../src/codecs/bitmask.ts';
+import type { BitmaskMap } from 'binary-codec';
+import { bitmaskCodec, numberCodec, ValidationLevel } from 'binary-codec';
 import { describe, expect, it } from 'vitest';
-import { bitmaskCodec } from '../../src/codecs/bitmask.ts';
-import { numberCodec } from '../../src/codecs/number.ts';
-import { ValidationLevel } from '../../src/validation/types.ts';
-import { createTestRegistry, toPlainView, toView, viewToArray } from '../helper.ts';
+import { createTestRegistry, toPlainView, toView, viewToArray } from '../helper';
 
 const reg = createTestRegistry([numberCodec]);
 

@@ -1,7 +1,6 @@
+import { rawCodec, ValidationLevel } from 'binary-codec';
 import { describe, expect, it } from 'vitest';
-import { rawCodec } from '../../src/codecs/raw.ts';
-import { ValidationLevel } from '../../src/validation/types.ts';
-import { dummyCtx, toPlainView, toView, viewToArray } from '../helper.ts';
+import { dummyCtx, toPlainView, toView, viewToArray } from '../helper';
 
 describe('raw', () => {
   describe('read', () => {

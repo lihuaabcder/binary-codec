@@ -1,13 +1,7 @@
-import type { CodecSpec } from '../../src/types.ts';
+import type { CodecSpec } from 'binary-codec';
+import { arrayCodec, bitmaskCodec, deserialize, numberCodec, objectCodec, rawCodec, serialize, stringCodec } from 'binary-codec';
 import { describe, expect, it } from 'vitest';
-import { arrayCodec } from '../../src/codecs/array.ts';
-import { bitmaskCodec } from '../../src/codecs/bitmask.ts';
-import { numberCodec } from '../../src/codecs/number.ts';
-import { objectCodec } from '../../src/codecs/object.ts';
-import { rawCodec } from '../../src/codecs/raw.ts';
-import { stringCodec } from '../../src/codecs/string.ts';
-import { deserialize, serialize } from '../../src/entries/index.ts';
-import { createTestRegistry, u8 } from '.././helper.ts';
+import { createTestRegistry, u8 } from '.././helper';
 
 describe('entries', () => {
   describe('deserialize', () => {

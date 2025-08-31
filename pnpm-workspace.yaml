@@ -1,0 +1,10 @@
+packages: null
+
+catalog:
+  '@antfu/eslint-config': ^4.13.1
+  '@types/node': ^24.3.0
+  bumpp: ^9.7.1
+  eslint: ^9.26.0
+  tsdown: ^0.14.1
+  typescript: ^5.8.3
+  vitest: ^3.1.4
