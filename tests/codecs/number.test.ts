@@ -1,7 +1,6 @@
+import { numberCodec, ValidationLevel } from 'binary-codec';
 import { describe, expect, it } from 'vitest';
-import { numberCodec } from '../../src/codecs/number.ts';
-import { ValidationLevel } from '../../src/validation/types.ts';
-import { dummyCtx, toPlainView, toView, viewToArray } from '../helper.ts';
+import { dummyCtx, toPlainView, toView, viewToArray } from '../helper';
 
 describe('number', () => {
   describe('read', () => {

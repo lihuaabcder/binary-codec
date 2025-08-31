@@ -1,8 +1,7 @@
-import type { CodecSpec } from '../src/index.ts';
-import type { Field } from '../src/types.ts';
+import type { CodecSpec, Field } from 'binary-codec';
+import { deserialize } from 'binary-codec';
 import { describe, expect, expectTypeOf, it } from 'vitest';
-import { deserialize } from '../src/index.ts';
-import { u8 } from './helper.ts';
+import { u8 } from './helper';
 
 describe('type', () => {
   it('should match type', () => {

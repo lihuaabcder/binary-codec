@@ -1,14 +1,7 @@
-import type { Field } from '../../src/types.ts';
+import type { Field } from 'binary-codec';
+import { arrayCodec, bitmaskCodec, bitsetCodec, numberCodec, objectCodec, rawCodec, stringCodec, ValidationLevel } from 'binary-codec';
 import { describe, expect, it } from 'vitest';
-import { arrayCodec } from '../../src/codecs/array.ts';
-import { bitmaskCodec } from '../../src/codecs/bitmask.ts';
-import { numberCodec } from '../../src/codecs/number.ts';
-import { objectCodec } from '../../src/codecs/object.ts';
-import { rawCodec } from '../../src/codecs/raw.ts';
-import { stringCodec } from '../../src/codecs/string.ts';
-import { bitsetCodec } from '../../src/index.ts';
-import { ValidationLevel } from '../../src/validation/types.ts';
-import { createTestRegistry, toPlainView, toView, viewToArray } from '../helper.ts';
+import { createTestRegistry, toPlainView, toView, viewToArray } from '../helper';
 
 const reg = createTestRegistry([
   rawCodec,

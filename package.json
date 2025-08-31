@@ -2,7 +2,7 @@
   "name": "binary-codec",
   "type": "module",
   "version": "0.1.0-beta.17",
-  "packageManager": "pnpm@10.14.0",
+  "packageManager": "pnpm@10.15.0",
   "description": "A lightweight TypeScript utility library for working with binary data.",
   "author": "lihuaabcder",
   "license": "MIT",
@@ -34,11 +34,13 @@
     "release": "bumpp"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.13.1",
-    "bumpp": "^9.7.1",
-    "eslint": "^9.26.0",
-    "tsdown": "^0.14.1",
-    "typescript": "^5.8.3",
-    "vitest": "^3.1.4"
+    "@antfu/eslint-config": "catalog:",
+    "@types/node": "catalog:",
+    "binary-codec": "workspace:*",
+    "bumpp": "catalog:",
+    "eslint": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

@@ -1,5 +1,5 @@
-import type { Codec, Resolver } from '../src/types.ts';
-import { CodecRegistry } from '../src/registry/registry.ts';
+import type { Codec, Resolver } from 'binary-codec';
+import { CodecRegistry } from 'binary-codec';
 
 export const u8 = (a: number[]): Uint8Array => new Uint8Array(a);
 
