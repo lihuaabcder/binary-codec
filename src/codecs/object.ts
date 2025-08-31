@@ -1,6 +1,6 @@
-import type { Codec, MetaField, SpecFields } from '../types.ts';
-import type { ValidationResult } from '../validation/types.ts';
-import { ValidationLevel } from '../validation/types.ts';
+import type { Codec, MetaField, SpecFields } from '../types';
+import type { ValidationResult } from '../validation/types';
+import { ValidationLevel } from '../validation/types';
 
 export type ObjectField = MetaField<'object'> & SpecFields;
 

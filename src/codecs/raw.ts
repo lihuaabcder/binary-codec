@@ -1,5 +1,5 @@
-import type { Codec, MetaField } from '../types.ts';
-import { ValidationLevel } from '../validation/types.ts';
+import type { Codec, MetaField } from '../types';
+import { ValidationLevel } from '../validation/types';
 
 export type RawField = MetaField<'raw'>;
 

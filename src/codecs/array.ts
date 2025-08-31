@@ -1,5 +1,5 @@
-import type { Codec, Field, MetaField } from '../types.ts';
-import { ValidationLevel } from '../validation/types.ts';
+import type { Codec, Field, MetaField } from '../types';
+import { ValidationLevel } from '../validation/types';
 
 export type ArrayField = MetaField<'array'> & {
   item: ArrayItemField

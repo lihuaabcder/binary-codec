@@ -1,8 +1,8 @@
-import type { CodecRegistry } from '../registry/registry.ts';
-import type { CodecSpec, Infer } from '../types.ts';
-import type { ValidationOptions } from '../validation/types.ts';
-import { getDefaultRegistry } from '../registry/default.ts';
-import { processValidationResults, validateBufferSize, validateCodecSpec, validateRuntimeData } from '../validation/validator.ts';
+import type { CodecRegistry } from '../registry/registry';
+import type { CodecSpec, Infer } from '../types';
+import type { ValidationOptions } from '../validation/types';
+import { getDefaultRegistry } from '../registry/default';
+import { processValidationResults, validateBufferSize, validateCodecSpec, validateRuntimeData } from '../validation/validator';
 
 export function deserialize<TSpec extends CodecSpec>(
   codecSpec: TSpec,

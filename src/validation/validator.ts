@@ -1,7 +1,7 @@
-import type { CodecRegistry } from '../registry/registry.ts';
-import type { CodecSpec, Field } from '../types.ts';
-import type { ValidationLogger, ValidationResult } from './types.ts';
-import { ValidationLevel } from './types.ts';
+import type { CodecRegistry } from '../registry/registry';
+import type { CodecSpec, Field } from '../types';
+import type { ValidationLogger, ValidationResult } from './types';
+import { ValidationLevel } from './types';
 
 export class ValidationError extends Error {
   constructor(message: string, public results: ValidationResult[]) {

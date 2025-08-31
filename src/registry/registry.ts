@@ -1,4 +1,4 @@
-import type { Codec, MetaField, Resolver } from '../types.ts';
+import type { Codec, MetaField, Resolver } from '../types';
 
 export class CodecRegistry {
   private map = new Map<string, Codec<any, any>>();
