@@ -1,6 +1,6 @@
-import type { Codec, MetaField } from '../types.ts';
-import type { NumberField } from './number.ts';
-import { ValidationLevel } from '../validation/types.ts';
+import type { Codec, MetaField } from '../types';
+import type { NumberField } from './number';
+import { ValidationLevel } from '../validation/types';
 
 export type BitsetField = MetaField<'bitset'>;
 

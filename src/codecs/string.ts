@@ -1,6 +1,6 @@
-import type { Codec, MetaField } from '../types.ts';
-import type { RawField } from './raw.ts';
-import { ValidationLevel } from '../validation/types.ts';
+import type { Codec, MetaField } from '../types';
+import type { RawField } from './raw';
+import { ValidationLevel } from '../validation/types';
 
 // TODO encoding...
 export type StringField = MetaField<'string'> & {

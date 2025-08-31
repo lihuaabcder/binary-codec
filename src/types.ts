@@ -1,11 +1,11 @@
-import type { ArrayField, ArrayItemField } from './codecs/array.ts';
-import type { BitmaskField, BooleanBitField, EnumBitField, UintBitField } from './codecs/bitmask.ts';
-import type { BitsetField } from './codecs/bitset.ts';
-import type { NumberField } from './codecs/number.ts';
-import type { ObjectField } from './codecs/object.ts';
-import type { RawField } from './codecs/raw.ts';
-import type { StringField } from './codecs/string.ts';
-import type { ValidationResult } from './validation/types.ts';
+import type { ArrayField, ArrayItemField } from './codecs/array';
+import type { BitmaskField, BooleanBitField, EnumBitField, UintBitField } from './codecs/bitmask';
+import type { BitsetField } from './codecs/bitset';
+import type { NumberField } from './codecs/number';
+import type { ObjectField } from './codecs/object';
+import type { RawField } from './codecs/raw';
+import type { StringField } from './codecs/string';
+import type { ValidationResult } from './validation/types';
 
 export type MetaField<T extends string> = {
   name: string

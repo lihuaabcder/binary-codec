@@ -1,5 +1,5 @@
-import { installAll } from './install.ts';
-import { CodecRegistry } from './registry.ts';
+import { installAll } from './install';
+import { CodecRegistry } from './registry';
 
 let _default: CodecRegistry | null = null;
 
