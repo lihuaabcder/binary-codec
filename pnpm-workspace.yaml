@@ -1,4 +1,5 @@
-packages: null
+packages:
+  - docs
 
 catalog:
   '@antfu/eslint-config': ^4.13.1
@@ -8,3 +9,8 @@ catalog:
   tsdown: ^0.14.1
   typescript: ^5.8.3
   vitest: ^3.1.4
+
+catalogs:
+  docs:
+    '@shikijs/vitepress-twoslash': ^3.12.0
+    vitepress: 2.0.0-alpha.12

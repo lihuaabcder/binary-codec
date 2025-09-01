@@ -1,0 +1,17 @@
+{
+  "name": "binary-codec-docs",
+  "type": "module",
+  "packageManager": "pnpm@10.15.0",
+  "author": "lihuaabcder",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "@shikijs/vitepress-twoslash": "catalog:docs",
+    "binary-codec": "workspace:*",
+    "vitepress": "catalog:docs"
+  }
+}
