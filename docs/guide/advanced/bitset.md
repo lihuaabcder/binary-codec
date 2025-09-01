@@ -403,56 +403,6 @@ const gameStateSpec = {
 // }
 ```
 
-## Working with Individual Bits
-
-Helper functions for common bitset operations:
-
-```ts twoslash
-import type { CodecSpec } from 'binary-codec';
-import { deserialize, serialize } from 'binary-codec';
-
-const spec = {
-  byteLength: 1,
-  fields: [
-    {
-      name: 'flags',
-      type: 'bitset',
-      byteOffset: 0,
-      byteLength: 1
-    }
-  ]
-} as const satisfies CodecSpec;
-
-// Helper functions
-function setBit(bits: boolean[], index: number, value: boolean): boolean[] {
-  const newBits = [...bits];
-  newBits[index] = value;
-  return newBits;
-}
-
-function getBit(bits: boolean[], index: number): boolean {
-  return bits[index] || false;
-}
-
-function toggleBit(bits: boolean[], index: number): boolean[] {
-  return setBit(bits, index, !getBit(bits, index));
-}
-
-// Usage
-let flags = Array.from({
-  length: 8
-}).fill(false);
-flags = setBit(flags, 0, true); // Set bit 0
-flags = setBit(flags, 3, true); // Set bit 3
-flags = toggleBit(flags, 0); // Toggle bit 0 (now false)
-
-const buffer = serialize(spec, {
-  flags
-});
-const result = deserialize(spec, buffer);
-console.log(result.flags); // [false, false, false, true, false, false, false, false]
-```
-
 ## Performance Considerations
 
 Bitsets are very memory efficient for boolean arrays:
