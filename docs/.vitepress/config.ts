@@ -5,6 +5,7 @@ import { defineConfig } from 'vitepress';
 export default defineConfig({
   title: 'Binary',
   description: 'A lightweight TypeScript utility library for working with binary data.',
+  base: '/binary-codec/',
   markdown: {
     codeTransformers: [
       transformerTwoslash(
