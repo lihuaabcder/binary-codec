@@ -11,13 +11,19 @@
 ## ✨ Features
 
 * 📦 **Lightweight** – minimal runtime dependency, pure TypeScript.
-* 🧩 **Modular codecs** – numbers, strings, bitmasks, arrays, objects.
+* 🧩 **Modular codecs** – raw, numbers, strings, bitset, bitmasks, arrays, objects.
 * 🔧 **Extensible** – define and register your own custom codec.
 * 🔄 **Symmetric design** – consistent `read` / `write` API.
 * 🌐 **Cross-platform** – works in Node.js and modern browsers.
 * 🧠 **Type inference from config** – generate precise TypeScript types automatically from your codec configuration, no manual typing needed.
 * ✅ **Built-in validation** – comprehensive validation system to catch configuration errors early.
 * 🔍 **Recursive validation** – validates nested structures with precise error paths.
+
+---
+
+## 📚 Documentations
+
+Please follow the details on the [Documentation](https://lihuaabcder.github.io/binary-codec/)!
 
 ---
 
@@ -78,7 +84,7 @@ const packetSpec = {
 } as const satisfies CodecSpec;
 
 // Deserialize binary data
-const buffer = new ArrayBuffer(21);
+const buffer = new Uint8Array(21); // mock data
 const data = deserialize(buffer, packetSpec);
 // Type: { id: number; name: string; flags: { enabled: boolean; priority: number } }
 
@@ -86,213 +92,7 @@ const data = deserialize(buffer, packetSpec);
 const binaryData = serialize(data, packetSpec);
 ```
 
-### Individual Codecs
-
-```ts
-import { createRegistry, numberCodec, stringCodec } from 'binary-codec';
-
-// Create a buffer
-const buffer = new ArrayBuffer(16);
-const view = new DataView(buffer);
-const registry = createRegistry();
-
-// Write a uint32
-numberCodec.write!(view, {
-  numberType: 'uint',
-  byteOffset: 0,
-  byteLength: 4
-}, 42, registry.resolver());
-
-// Read it back
-const value = numberCodec.read(view, {
-  numberType: 'uint',
-  byteOffset: 0,
-  byteLength: 4
-}, registry.resolver());
-console.log(value); // 42
-```
-
 ---
-
-## 📖 Built-in Codecs
-
-### Number Codec
-
-Handles integers and floating-point numbers with configurable byte lengths:
-
-```ts
-import { numberCodec } from 'binary-codec';
-
-// Unsigned integers: 1, 2, or 4 bytes
-{ type: 'number', numberType: 'uint', byteLength: 1 }   // 0-255
-{ type: 'number', numberType: 'uint', byteLength: 2 }   // 0-65535
-{ type: 'number', numberType: 'uint', byteLength: 4 }   // 0-4294967295
-
-// Signed integers: 1, 2, or 4 bytes
-{ type: 'number', numberType: 'int', byteLength: 1 }    // -128 to 127
-{ type: 'number', numberType: 'int', byteLength: 2 }    // -32768 to 32767
-{ type: 'number', numberType: 'int', byteLength: 4 }    // -2147483648 to 2147483647
-
-// Floating-point: 4 bytes only
-{ type: 'number', numberType: 'float', byteLength: 4 }  // IEEE 754 single precision
-```
-
-### String Codec
-
-Fixed-length UTF-8 encoded strings:
-
-```ts
-import { stringCodec } from 'binary-codec';
-
-{
-  type: 'string',
-  byteOffset: 0,
-  byteLength: 32,
-  encoding: 'utf-8',     // optional, defaults to 'utf-8'
-  trimNull: true         // optional, defaults to true
-}
-```
-
-### Bitmask Codec
-
-Extract and map individual bits or bit ranges:
-
-```ts
-import { bitmaskCodec } from 'binary-codec';
-
-{
-  type: 'bitmask',
-  byteOffset: 0,
-  byteLength: 2,
-  map: {
-    // Single bits
-    flag1: { bits: 0, type: 'boolean' },
-    flag2: { bits: 15, type: 'boolean' },
-
-    // Bit ranges
-    value: { bits: [7, 4], type: 'uint' },      // bits 7-4 (4 bits)
-
-    // Enum values
-    status: {
-      bits: [3, 2],
-      type: 'enum',
-      values: ['idle', 'running', 'error']
-    }
-  }
-}
-```
-
-### Array Codec
-
-Repeated elements of the same type:
-
-```ts
-import { arrayCodec } from 'binary-codec';
-
-{
-  type: 'array',
-  byteOffset: 0,
-  byteLength: 12,        // total bytes for array
-  item: {
-    type: 'number',
-    numberType: 'uint',
-    byteLength: 4        // 12 / 4 = 3 elements
-  }
-}
-```
-
-### Object Codec
-
-Structured data with multiple fields:
-
-```ts
-import { objectCodec } from 'binary-codec';
-
-{
-  type: 'object',
-  byteOffset: 0,
-  byteLength: 16,
-  fields: [
-    {
-      name: 'header',
-      type: 'number',
-      numberType: 'uint',
-      byteOffset: 0,
-      byteLength: 4
-    },
-    {
-      name: 'payload',
-      type: 'string',
-      byteOffset: 4,
-      byteLength: 12
-    }
-  ]
-}
-```
-
-### Raw Codec
-
-Direct byte access:
-
-```ts
-import { rawCodec } from 'binary-codec';
-
-{
-  type: 'raw',
-  byteOffset: 0,
-  byteLength: 8
-}
-// Returns: Uint8Array
-```
-
-### Bitset Codec
-
-Boolean array representation:
-
-<!-- eslint-skip -->
-```ts
-import { bitsetCodec } from 'binary-codec';
-
-{
-  type: 'bitset',
-  byteOffset: 0,
-  byteLength: 2        // 16 bits = 16 boolean values
-}
-// Returns: boolean[]
-```
-
----
-
-## ✅ Validation System
-
-binary-codec includes a comprehensive validation system that catches configuration errors at runtime:
-
-### Automatic Validation
-
-```ts
-import { deserialize } from 'binary-codec';
-
-const spec = {
-  fields: [
-    {
-      name: 'invalid',
-      type: 'number',
-      numberType: 'float',
-      byteOffset: 0,
-      byteLength: 3 // ❌ Error: float must be 4 bytes
-    }
-  ]
-};
-
-// Throws ValidationError with detailed information
-try {
-  deserialize(buffer, spec);
-} catch (error) {
-  console.log(error.message); // "Invalid combination: float with 3 bytes"
-  console.log(error.path); // "fields[0]"
-  console.log(error.code); // "INVALID_NUMBER_TYPE_LENGTH"
-}
-```
 
 ### Manual Validation
 
