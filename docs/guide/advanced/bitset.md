@@ -22,7 +22,7 @@ const spec = {
       name: 'flags',
       type: 'bitset',
       byteOffset: 0,
-      byteLength: 2  // 2 bytes = 16 bits = 16 booleans
+      byteLength: 2 // 2 bytes = 16 bits = 16 booleans
     }
   ]
 } as const satisfies CodecSpec;
@@ -30,10 +30,22 @@ const spec = {
 // Serialize boolean array to buffer
 const data = {
   flags: [
-    true, false, true, false,   // First byte, bits 0-3
-    true, true, false, false,   // First byte, bits 4-7
-    false, true, false, true,   // Second byte, bits 0-3
-    false, false, true, true    // Second byte, bits 4-7
+    true,
+    false,
+    true,
+    false, // First byte, bits 0-3
+    true,
+    true,
+    false,
+    false, // First byte, bits 4-7
+    false,
+    true,
+    false,
+    true, // Second byte, bits 0-3
+    false,
+    false,
+    true,
+    true // Second byte, bits 4-7
   ]
 };
 const buffer = serialize(spec, data);
@@ -53,7 +65,7 @@ console.log(result.flags); // boolean[16]
 | `byteLength` | `number` | ✅ | Number of bytes (determines bit count) |
 
 ```ts twoslash
-import type { CodecSpec } from 'binary-codec'
+import type { CodecSpec } from 'binary-codec';
 
 const spec = {
   byteLength: 4,
@@ -62,10 +74,10 @@ const spec = {
       name: 'permissions',
       type: 'bitset',
       byteOffset: 0,
-      byteLength: 4        // 4 bytes = 32 bits = 32 booleans
+      byteLength: 4 // 4 bytes = 32 bits = 32 booleans
     }
   ]
-} as const satisfies CodecSpec
+} as const satisfies CodecSpec;
 ```
 
 ## Bit Ordering (LSB-First)
@@ -83,7 +95,7 @@ const spec = {
       name: 'bits',
       type: 'bitset',
       byteOffset: 0,
-      byteLength: 1  // 1 byte = 8 bits
+      byteLength: 1 // 1 byte = 8 bits
     }
   ]
 } as const satisfies CodecSpec;
@@ -107,7 +119,7 @@ For multi-byte bitsets, bits are concatenated by bytes (LSB-first within each by
 
 ```ts twoslash
 import type { CodecSpec } from 'binary-codec';
-import { serialize, deserialize } from 'binary-codec';
+import { deserialize, serialize } from 'binary-codec';
 
 const spec = {
   byteLength: 2,
@@ -116,7 +128,7 @@ const spec = {
       name: 'bits',
       type: 'bitset',
       byteOffset: 0,
-      byteLength: 2  // 16 bits total
+      byteLength: 2 // 16 bits total
     }
   ]
 } as const satisfies CodecSpec;
@@ -124,9 +136,23 @@ const spec = {
 const data = {
   bits: [
     // First byte (bits 0-7)
-    true, false, false, false, false, false, false, false,
-    // Second byte (bits 8-15)  
-    false, false, false, false, false, false, false, true
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    // Second byte (bits 8-15)
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true
   ]
 };
 
@@ -136,7 +162,7 @@ console.log(Array.from(buffer)); // [0x01, 0x80]
 // Second byte: 0x80 (binary: 10000000, MSB=true)
 
 const result = deserialize(spec, buffer);
-console.log(result.bits[0]);  // true  (first bit of first byte)
+console.log(result.bits[0]); // true  (first bit of first byte)
 console.log(result.bits[15]); // true  (last bit of second byte)
 ```
 
@@ -149,15 +175,15 @@ import type { CodecSpec } from 'binary-codec';
 
 const examples = [
   {
-    byteLength: 1,   // 1 × 8 = 8 booleans
+    byteLength: 1, // 1 × 8 = 8 booleans
     name: 'byte'
   },
   {
-    byteLength: 2,   // 2 × 8 = 16 booleans  
+    byteLength: 2, // 2 × 8 = 16 booleans
     name: 'word'
   },
   {
-    byteLength: 4,   // 4 × 8 = 32 booleans
+    byteLength: 4, // 4 × 8 = 32 booleans
     name: 'dword'
   }
 ] as const;
@@ -169,19 +195,19 @@ const multiSpec = {
       name: 'byte',
       type: 'bitset',
       byteOffset: 0,
-      byteLength: 1  // 8 booleans
+      byteLength: 1 // 8 booleans
     },
     {
-      name: 'word', 
+      name: 'word',
       type: 'bitset',
       byteOffset: 1,
-      byteLength: 2  // 16 booleans
+      byteLength: 2 // 16 booleans
     },
     {
       name: 'dword',
       type: 'bitset',
       byteOffset: 3,
-      byteLength: 4  // 32 booleans
+      byteLength: 4 // 32 booleans
     }
   ]
 } as const satisfies CodecSpec;
@@ -203,7 +229,7 @@ This validation occurs during **both** deserialization and serialization:
 | `INVALID_BITSET_LENGTH` | **FATAL** | Field `byteLength` must be positive (> 0) |
 
 ```ts twoslash
-import type { CodecSpec } from 'binary-codec'
+import type { CodecSpec } from 'binary-codec';
 
 // ❌ This spec will cause FATAL validation error in both operations
 const invalidSpec = {
@@ -213,10 +239,10 @@ const invalidSpec = {
       name: 'flags',
       type: 'bitset',
       byteOffset: 0,
-      byteLength: 0  // INVALID_BITSET_LENGTH: must be > 0
+      byteLength: 0 // INVALID_BITSET_LENGTH: must be > 0
     }
   ]
-} as const satisfies CodecSpec
+} as const satisfies CodecSpec;
 ```
 
 ### Data Validation
@@ -230,8 +256,8 @@ This validation occurs **only** during serialization:
 | `INVALID_BITSET_ELEMENT_TYPE` | **ERROR** | All array elements must be boolean |
 
 ```ts twoslash
-import type { CodecSpec } from 'binary-codec'
-import { serialize } from 'binary-codec'
+import type { CodecSpec } from 'binary-codec';
+import { serialize } from 'binary-codec';
 
 const spec = {
   byteLength: 2,
@@ -240,10 +266,10 @@ const spec = {
       name: 'flags',
       type: 'bitset',
       byteOffset: 0,
-      byteLength: 2  // Expected: 16 booleans
+      byteLength: 2 // Expected: 16 booleans
     }
   ]
-} as const satisfies CodecSpec
+} as const satisfies CodecSpec;
 
 // ❌ INVALID_BITSET_DATA_TYPE: not an array
 // const result1 = serialize(spec, { flags: "not array" })
@@ -255,9 +281,11 @@ const spec = {
 // const result3 = serialize(spec, { flags: Array(16).fill(1) }) // Numbers, not booleans
 
 // ✅ Valid data
-const result = serialize(spec, { 
-  flags: Array(16).fill(false).map((_, i) => i % 2 === 0) 
-})
+const result = serialize(spec, {
+  flags: Array.from({
+    length: 16
+  }).fill(false).map((_, i) => i % 2 === 0)
+});
 ```
 
 ## Real-World Examples
@@ -275,21 +303,21 @@ const permissionSpec = {
       name: 'permissions',
       type: 'bitset',
       byteOffset: 0,
-      byteLength: 1  // 8 permission flags
+      byteLength: 1 // 8 permission flags
     }
   ]
 } as const satisfies CodecSpec;
 
 const userPermissions = {
   permissions: [
-    true,   // read (bit 0)
-    true,   // write (bit 1)
-    false,  // execute (bit 2)
-    true,   // delete (bit 3)
-    false,  // admin (bit 4)
-    false,  // modify (bit 5)
-    true,   // share (bit 6)
-    false   // export (bit 7)
+    true, // read (bit 0)
+    true, // write (bit 1)
+    false, // execute (bit 2)
+    true, // delete (bit 3)
+    false, // admin (bit 4)
+    false, // modify (bit 5)
+    true, // share (bit 6)
+    false // export (bit 7)
   ]
 };
 
@@ -298,7 +326,12 @@ const parsed = deserialize(permissionSpec, buffer);
 
 // Check specific permissions
 const [read, write, execute, deletePerm] = parsed.permissions;
-console.log({ read, write, execute, delete: deletePerm });
+console.log({
+  read,
+  write,
+  execute,
+  delete: deletePerm
+});
 // { read: true, write: true, execute: false, delete: true }
 ```
 
@@ -306,7 +339,7 @@ console.log({ read, write, execute, delete: deletePerm });
 
 ```ts twoslash
 import type { CodecSpec } from 'binary-codec';
-import { serialize, deserialize } from 'binary-codec';
+import { deserialize, serialize } from 'binary-codec';
 
 const configSpec = {
   byteLength: 4,
@@ -315,19 +348,23 @@ const configSpec = {
       name: 'features',
       type: 'bitset',
       byteOffset: 0,
-      byteLength: 4  // 32 feature flags
+      byteLength: 4 // 32 feature flags
     }
   ]
 } as const satisfies CodecSpec;
 
 // Create feature flags array (32 bits)
-const features = Array(32).fill(false);
-features[0] = true;   // darkMode
-features[2] = true;   // notifications  
-features[5] = true;   // analytics
-features[10] = true;  // betaFeatures
+const features = Array.from({
+  length: 32
+}).fill(false);
+features[0] = true; // darkMode
+features[2] = true; // notifications
+features[5] = true; // analytics
+features[10] = true; // betaFeatures
 
-const config = { features };
+const config = {
+  features
+};
 const buffer = serialize(configSpec, config);
 
 // Read back and check specific features
@@ -348,13 +385,13 @@ const gameStateSpec = {
       name: 'levelsCompleted',
       type: 'bitset',
       byteOffset: 0,
-      byteLength: 8   // 64 levels
+      byteLength: 8 // 64 levels
     },
     {
       name: 'achievementsUnlocked',
       type: 'bitset',
       byteOffset: 8,
-      byteLength: 4   // 32 achievements
+      byteLength: 4 // 32 achievements
     }
   ]
 } as const satisfies CodecSpec;
@@ -362,7 +399,7 @@ const gameStateSpec = {
 // Type inferred as:
 // {
 //   levelsCompleted: boolean[],      // 64 booleans
-//   achievementsUnlocked: boolean[]  // 32 booleans  
+//   achievementsUnlocked: boolean[]  // 32 booleans
 // }
 ```
 
@@ -402,12 +439,16 @@ function toggleBit(bits: boolean[], index: number): boolean[] {
 }
 
 // Usage
-let flags = Array(8).fill(false);
-flags = setBit(flags, 0, true);    // Set bit 0
-flags = setBit(flags, 3, true);    // Set bit 3
-flags = toggleBit(flags, 0);       // Toggle bit 0 (now false)
+let flags = Array.from({
+  length: 8
+}).fill(false);
+flags = setBit(flags, 0, true); // Set bit 0
+flags = setBit(flags, 3, true); // Set bit 3
+flags = toggleBit(flags, 0); // Toggle bit 0 (now false)
 
-const buffer = serialize(spec, { flags });
+const buffer = serialize(spec, {
+  flags
+});
 const result = deserialize(spec, buffer);
 console.log(result.flags); // [false, false, false, true, false, false, false, false]
 ```
@@ -420,12 +461,14 @@ Bitsets are very memory efficient for boolean arrays:
 // Memory comparison for 1000 boolean values:
 
 // Regular boolean array: ~1000 bytes (1 byte per boolean in most JS engines)
-const boolArray: boolean[] = Array(1000).fill(false);
+const boolArray: boolean[] = Array.from({
+  length: 1000
+}).fill(false);
 
 // Bitset: 125 bytes (8 booleans per byte)
 // byteLength: Math.ceil(1000 / 8) = 125 bytes
 const bitsetSpec = {
-  byteLength: 125,  // 125 × 8 = 1000 bits
+  byteLength: 125, // 125 × 8 = 1000 bits
   fields: [
     {
       name: 'flags',
@@ -444,5 +487,5 @@ const bitsetSpec = {
 Now that you understand the bitset codec, continue with:
 
 - [Bitmask Codec](/guide/advanced/bitmask) - Bit field extraction
-- [Array Codec](/guide/advanced/array) - Repeating structures  
+- [Array Codec](/guide/advanced/array) - Repeating structures
 - [Object Codec](/guide/advanced/object) - Complex nested structures

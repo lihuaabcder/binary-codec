@@ -249,6 +249,7 @@ import { rawCodec } from 'binary-codec';
 
 Boolean array representation:
 
+<!-- eslint-skip -->
 ```ts
 import { bitsetCodec } from 'binary-codec';
 
