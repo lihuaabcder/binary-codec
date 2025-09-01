@@ -1,425 +1,138 @@
 # binary-codec
 
-> A lightweight TypeScript utility library for working with binary data.
-> Encode and decode numbers, strings, bitmasks, arrays, and objects directly from `ArrayBuffer`/`DataView`.
+A lightweight TypeScript library for type-safe binary data serialization/deserialization using `Uint8Array`.
 
-[![npm version](https://img.shields.io/npm/v/binary-codec.svg)](https://www.npmjs.com/package/binary-codec)
-[![license](https://img.shields.io/npm/l/binary-codec.svg)](./LICENSE)
+## Features
 
----
+- **Type-safe binary operations** - Full TypeScript type inference from codec specs
+- **Uint8Array focused** - Designed specifically for `Uint8Array` data
+- **Declarative schema approach** - Define binary structures using simple objects
+- **Extensible codec system** - Support for custom data types through registry
+- **Built-in validation** - Comprehensive validation for both schemas and runtime data
 
-## ✨ Features
-
-* 📦 **Lightweight** – minimal runtime dependency, pure TypeScript.
-* 🧩 **Modular codecs** – raw, numbers, strings, bitset, bitmasks, arrays, objects.
-* 🔧 **Extensible** – define and register your own custom codec.
-* 🔄 **Symmetric design** – consistent `read` / `write` API.
-* 🌐 **Cross-platform** – works in Node.js and modern browsers.
-* 🧠 **Type inference from config** – generate precise TypeScript types automatically from your codec configuration, no manual typing needed.
-* ✅ **Built-in validation** – comprehensive validation system to catch configuration errors early.
-* 🔍 **Recursive validation** – validates nested structures with precise error paths.
-
----
-
-## 📚 Documentations
-
-Please follow the details on the [Documentation](https://lihuaabcder.github.io/binary-codec/)!
-
----
-
-## 🚀 Installation
+## Installation
 
 ```bash
-pnpm add binary-codec
-# or
 npm install binary-codec
+# or
+pnpm add binary-codec
 # or
 yarn add binary-codec
 ```
 
----
+## Quick Start
 
-## ⚡ Quick Start
-
-### Basic Usage
-
-```ts
-import type { CodecSpec } from 'binary-codec';
+```typescript
+import type { CodecSpec, Infer } from 'binary-codec';
 import { deserialize, serialize } from 'binary-codec';
 
-// Define your data structure
+// Define your binary structure
 const packetSpec = {
-  byteLength: 21,
+  byteLength: 8,
   fields: [
-    {
-      name: 'id',
-      type: 'number',
-      numberType: 'uint',
-      byteOffset: 0,
-      byteLength: 4
+    { 
+      name: 'header', 
+      type: 'number', 
+      byteOffset: 0, 
+      byteLength: 2, 
+      readerType: 'Uint16' 
     },
-    {
-      name: 'name',
-      type: 'string',
-      byteOffset: 4,
-      byteLength: 16
-    },
-    {
-      name: 'flags',
-      type: 'bitmask',
-      byteOffset: 20,
-      byteLength: 1,
-      map: {
-        enabled: {
-          bits: 0,
-          type: 'boolean'
-        },
-        priority: {
-          bits: [3, 1],
-          type: 'uint'
-        }
-      }
+    { 
+      name: 'payload', 
+      type: 'raw', 
+      byteOffset: 2, 
+      byteLength: 6 
     }
   ]
 } as const satisfies CodecSpec;
 
+// Get full type inference
+type Packet = Infer<typeof packetSpec>;
+// Inferred type: { header: number; payload: Uint8Array }
+
 // Deserialize binary data
-const buffer = new Uint8Array(21); // mock data
-const data = deserialize(buffer, packetSpec);
-// Type: { id: number; name: string; flags: { enabled: boolean; priority: number } }
+const buffer = new Uint8Array([0x12, 0x34, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06]);
+const packet = deserialize(packetSpec, buffer);
 
-// Serialize data to binary
-const binaryData = serialize(data, packetSpec);
-```
-
----
-
-### Manual Validation
-
-```ts
-import { createRegistry, validateCodecSpec } from 'binary-codec';
-
-const registry = createRegistry();
-const results = validateCodecSpec(spec, registry);
-
-results.forEach(result => {
-  console.log(`${result.level}: ${result.message} at ${result.path}`);
+// Serialize back to binary
+const binaryData = serialize(packetSpec, {
+  header: 0x1234,
+  payload: new Uint8Array([1, 2, 3, 4, 5, 6])
 });
 ```
 
-### Validation Levels
+## Supported Data Types
 
-- **FATAL**: Critical errors that prevent operation
-- **ERROR**: Serious issues that should be fixed
-- **WARNING**: Potential problems worth noting
-- **INFO**: Informational messages
+### Basic Types
 
-### Recursive Validation
+- **`raw`** - Raw bytes as `Uint8Array`
+- **`string`** - Text with encoding support (utf8, ascii, etc.)
+- **`number`** - Integers with various sizes (Uint8, Int16, Uint32, etc.)
 
-The validation system automatically validates nested structures:
+### Advanced Types
 
-```ts
-const complexSpec = {
-  fields: [
-    {
-      name: 'data',
-      type: 'array',
-      byteOffset: 0,
-      byteLength: 8,
-      item: {
-        type: 'bitmask',
-        byteLength: 2,
-        map: {
-          invalid: {
-            bits: 20, // ❌ Error: exceeds 16 bits
-            type: 'boolean'
-          }
-        }
-      }
-    }
-  ]
-};
+- **`bitset`** - Boolean arrays with bit-level packing
+- **`bitmask`** - Structured bit fields with named boolean/enum/uint fields
+- **`array`** - Arrays of other codec types
+- **`object`** - Nested structures with multiple fields
 
-// Error path: "fields[0].item.map.invalid"
+## Core API
+
+```typescript
+// Deserialize Uint8Array to typed object
+function deserialize<T extends CodecSpec>(
+  spec: T, 
+  buffer: Uint8Array, 
+  registry?: CodecRegistry,
+  options?: ValidationOptions
+): Infer<T>
+
+// Serialize typed object to Uint8Array
+function serialize(
+  spec: CodecSpec, 
+  value: Record<string, any>,
+  registry?: CodecRegistry,
+  options?: ValidationOptions  
+): Uint8Array
+
+// Type inference utility
+type Infer<T extends CodecSpec> = // Inferred type from spec
 ```
 
----
+## Working with Uint8Array
 
-## 🔧 Custom Codecs
+This library is specifically designed for `Uint8Array` operations:
 
-Extend the library with your own codecs:
+```typescript
+// Input: Uint8Array
+const binaryData = new Uint8Array([0x01, 0x02, 0x03, 0x04]);
+const decoded = deserialize(spec, binaryData);
 
-```ts
-import { Codec, ValidationLevel } from 'binary-codec';
+// Output: Uint8Array 
+const encoded = serialize(spec, data);
+console.log(encoded instanceof Uint8Array); // true
 
-// Define your codec
-const customCodec: Codec<CustomSpec, CustomType> = {
-  type: 'custom',
-  read: (view, spec, ctx) => {
-    // Your read implementation
-  },
-  write: (view, spec, value, ctx) => {
-    // Your write implementation
-  },
-  validate: (spec, path, ctx) => {
-    // Optional validation
-    const results = [];
-    if (/* invalid condition */) {
-      results.push({
-        level: ValidationLevel.ERROR,
-        message: 'Custom validation error',
-        path,
-        code: 'CUSTOM_ERROR'
-      });
-    }
-    return results;
-  }
-};
-
-// Register it
-const registry = createRegistry();
-registry.install(customCodec);
-```
-
----
-
-## 🧠 Type Inference
-
-Get precise TypeScript types automatically from your configuration:
-
-```ts
-import { Infer } from 'binary-codec';
-
-const packetSpec = {
-  byteLength: 13,
-  fields: [
-    {
-      name: 'id',
-      type: 'number',
-      numberType: 'uint',
-      byteOffset: 0,
-      byteLength: 4
-    },
-    {
-      name: 'flags',
-      type: 'bitmask',
-      byteOffset: 4,
-      byteLength: 1,
-      map: {
-        active: {
-          bits: 0,
-          type: 'boolean'
-        },
-        priority: {
-          bits: [3, 1],
-          type: 'uint'
-        }
-      }
-    },
-    {
-      name: 'items',
-      type: 'array',
-      byteOffset: 5,
-      byteLength: 8,
-      item: {
-        type: 'number',
-        numberType: 'uint',
-        byteLength: 2
-      }
-    }
-  ]
-} as const satisfies CodecSpec;
-
-// Automatically inferred type:
-type PacketType = Infer<typeof packetSpec>;
-// {
-//   id: number;
-//   flags: { active: boolean; priority: number };
-//   items: number[];
-// }
-```
-
----
-
-## 🌐 Browser & Node.js
-
-Works seamlessly in both environments:
-
-```ts
-// Node.js
-import fs from 'node:fs';
-import { deserialize } from 'binary-codec';
-
-const buffer = fs.readFileSync('data.bin');
-const data = deserialize(buffer, spec);
-
-// Browser
-fetch('/api/data')
-  .then(response => response.arrayBuffer())
-  .then(buffer => deserialize(buffer, spec));
-```
-
----
-
-## 📊 Performance
-
-- **Zero dependencies** – minimal bundle size
-- **Efficient operations** – direct `DataView` manipulation
-- **Type-safe** – compile-time type checking
-- **Memory efficient** – no intermediate object creation during serialization
-
----
-
-## 🔄 Endianness
-
-Control byte order for multi-byte values:
-
-```ts
-{
-  type: 'number',
-  numberType: 'uint',
+// Raw fields preserve Uint8Array type
+const rawSpec = {
   byteLength: 4,
-  littleEndian: true  // default: false (big-endian)
-}
-```
-
----
-
-## 📝 Examples
-
-### Network Protocol Parsing
-
-```ts
-import type { CodecSpec } from 'binary-codec';
-
-const tcpHeaderSpec = {
-  byteLength: 14,
   fields: [
-    {
-      name: 'srcPort',
-      type: 'number',
-      numberType: 'uint',
-      byteOffset: 0,
-      byteLength: 2
-    },
-    {
-      name: 'dstPort',
-      type: 'number',
-      numberType: 'uint',
-      byteOffset: 2,
-      byteLength: 2
-    },
-    {
-      name: 'seqNum',
-      type: 'number',
-      numberType: 'uint',
-      byteOffset: 4,
-      byteLength: 4
-    },
-    {
-      name: 'ackNum',
-      type: 'number',
-      numberType: 'uint',
-      byteOffset: 8,
-      byteLength: 4
-    },
-    {
-      name: 'flags',
-      type: 'bitmask',
-      byteOffset: 13,
-      byteLength: 1,
-      map: {
-        fin: {
-          bits: 0,
-          type: 'boolean'
-        },
-        syn: {
-          bits: 1,
-          type: 'boolean'
-        },
-        rst: {
-          bits: 2,
-          type: 'boolean'
-        },
-        psh: {
-          bits: 3,
-          type: 'boolean'
-        },
-        ack: {
-          bits: 4,
-          type: 'boolean'
-        },
-        urg: {
-          bits: 5,
-          type: 'boolean'
-        }
-      }
+    { 
+      name: 'data', 
+      type: 'raw', 
+      byteOffset: 0, 
+      byteLength: 4 
     }
   ]
 } as const satisfies CodecSpec;
 
-const header = deserialize(packetBuffer, tcpHeaderSpec);
-console.log(header.flags.syn); // boolean
+type RawType = Infer<typeof rawSpec>; 
+// { data: Uint8Array }
 ```
 
-### File Format Parsing
+## Documentation
 
-```ts
-const bmpHeaderSpec = {
-  byteLength: 26,
-  fields: [
-    {
-      name: 'signature',
-      type: 'string',
-      byteOffset: 0,
-      byteLength: 2
-    },
-    {
-      name: 'fileSize',
-      type: 'number',
-      numberType: 'uint',
-      byteOffset: 2,
-      byteLength: 4,
-      littleEndian: true
-    },
-    {
-      name: 'dataOffset',
-      type: 'number',
-      numberType: 'uint',
-      byteOffset: 10,
-      byteLength: 4,
-      littleEndian: true
-    },
-    {
-      name: 'width',
-      type: 'number',
-      numberType: 'uint',
-      byteOffset: 18,
-      byteLength: 4,
-      littleEndian: true
-    },
-    {
-      name: 'height',
-      type: 'number',
-      numberType: 'uint',
-      byteOffset: 22,
-      byteLength: 4,
-      littleEndian: true
-    }
-  ]
-} as const;
+For comprehensive guides and examples, visit the [documentation](https://lihuaabcder.github.io/binary-codec/).
 
-const bmpHeader = deserialize(fileBuffer, bmpHeaderSpec);
-```
+## License
 
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit issues and pull requests.
-
----
-
-## 📄 License
-
-MIT License - see [LICENSE](./LICENSE) file for details.
+MIT
