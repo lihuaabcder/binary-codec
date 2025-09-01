@@ -4,11 +4,11 @@ A lightweight TypeScript library for type-safe binary data serialization/deseria
 
 ## Features
 
-- **Type-safe binary operations** - Full TypeScript type inference from codec specs
-- **Uint8Array focused** - Designed specifically for `Uint8Array` data
-- **Declarative schema approach** - Define binary structures using simple objects
-- **Extensible codec system** - Support for custom data types through registry
-- **Built-in validation** - Comprehensive validation for both schemas and runtime data
+- 🚀**Type-safe binary operations** - Full TypeScript type inference from codec specs
+- 📦 **Uint8Array focused** - Designed specifically for `Uint8Array` data
+- 📝 **Declarative schema approach** - Define binary structures using simple objects
+- 🔧 **Extensible codec system** - Support for custom data types through registry
+- ✅ **Built-in validation** - Comprehensive validation for both schemas and runtime data
 
 ## Installation
 
