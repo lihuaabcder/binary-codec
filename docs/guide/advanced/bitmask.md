@@ -1,4 +1,4 @@
-# Bitmask Codec
+# Bitmask
 
 The **bitmask codec** extracts structured data from individual bits and bit ranges within a numeric value. It allows you to define named fields that map to specific bit positions, making it perfect for packed data structures and control registers.
 

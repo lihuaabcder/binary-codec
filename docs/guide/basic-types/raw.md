@@ -1,4 +1,4 @@
-# Raw Codec
+# Raw
 
 The **raw codec** is the most fundamental codec in Binary Codec. It handles raw binary data as `Uint8Array` and serves as the foundation for other codecs like string.
 

@@ -1,4 +1,4 @@
-# Number Codec
+# Number
 
 The **number codec** handles numeric data encoding and decoding using JavaScript's `DataView` for precise binary representation. It supports integers and floating-point numbers with different byte lengths.
 

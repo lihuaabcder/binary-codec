@@ -1,4 +1,4 @@
-# Object Codec
+# Object
 
 The **object codec** is the most powerful codec, capable of combining any other codec types into complex nested structures. It serves as the foundation for the main `serialize` and `deserialize` functions.
 

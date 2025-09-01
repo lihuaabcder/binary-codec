@@ -1,4 +1,4 @@
-# String Codec
+# String
 
 The **string codec** handles text encoding and decoding, built on top of the raw codec. It converts text to/from binary data using configurable character encodings.
 

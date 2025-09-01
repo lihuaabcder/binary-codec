@@ -1,4 +1,4 @@
-# Bitset Codec
+# Bitset
 
 The **bitset codec** handles arrays of boolean values by packing them efficiently into bits. Each byte stores 8 boolean values using LSB-first bit ordering, making it ideal for flags, permissions, and state tracking.
 

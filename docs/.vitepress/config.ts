@@ -3,7 +3,7 @@ import { transformerTwoslash } from '@shikijs/vitepress-twoslash';
 import { defineConfig } from 'vitepress';
 
 export default defineConfig({
-  title: 'Binary',
+  title: 'Binary Codec',
   description: 'A lightweight TypeScript utility library for working with binary data.',
   base: '/binary-codec/',
   markdown: {

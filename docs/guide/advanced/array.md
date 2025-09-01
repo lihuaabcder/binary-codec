@@ -1,4 +1,4 @@
-# Array Codec
+# Array
 
 The **array codec** handles repeating data structures by defining a single item specification that gets repeated across a fixed byte range. It can contain any non-array codec as items.
 
